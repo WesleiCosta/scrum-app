@@ -362,7 +362,7 @@ function SprintLogPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sprintLogs
+                {[...sprintLogs]
                   .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime())
                   .map((sprint) => (
                   <tr key={sprint.id} className="hover:bg-gray-50">
@@ -391,7 +391,7 @@ function SprintLogPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {(() => {
-                        const sortedSprints = sprintLogs.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+                        const sortedSprints = [...sprintLogs].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
                         const sortedIndex = sortedSprints.findIndex(s => s.id === sprint.id);
                         
                         if (sortedIndex === 0) {
