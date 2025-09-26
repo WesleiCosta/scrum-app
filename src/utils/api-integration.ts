@@ -129,7 +129,7 @@ export class APIContextIntegration {
 
       // 3. Mapear UnifiedState para ProjectState para compatibilidade
       const projectStateMap: Record<UnifiedState, string> = {
-        'Saudável': 'ESTÁVEL',
+        'Saudável': 'BOM',      // Corrigido: Saudável -> BOM ao invés de ESTÁVEL
         'Em Risco': 'RISCO', 
         'Crítico': 'CRÍTICO'
       };
@@ -182,8 +182,7 @@ export class APIContextIntegration {
             projectId,
             sprintLog.id,
             'DYNAMIC',
-            dynamicMatrix,
-            project.nValue
+            dynamicMatrix
           );
         }
       }

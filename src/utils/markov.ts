@@ -195,7 +195,7 @@ export function calculateEntropy(probabilities: StateProjection['probabilities']
 export function isValidTransitionMatrix(matrix: number[][]): boolean {
   return matrix.every(row => {
     const sum = row.reduce((acc, val) => acc + val, 0);
-    return Math.abs(sum - 1) < 0.0001 || sum === 0; // Tolerância para erros de ponto flutuante
+    return Math.abs(sum - 1) < 0.001 || sum === 0; // Tolerância padronizada: 0.001
   });
 }
 

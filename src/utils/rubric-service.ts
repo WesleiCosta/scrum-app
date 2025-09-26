@@ -135,32 +135,16 @@ export class RubricService {
    */
   static createDefaultRubric(projectId: string): Rubric {
     const defaultCriteria: RubricCriterion[] = [
-      // Critérios para Estado Saudável (id 0-2)
+      // Critério para Estado Crítico (prioridade máxima)
       {
         id: generateId(),
-        stateId: 0, // Excelente
+        stateId: 4, // Crítico
         metricName: 'velocityPoints',
-        operator: 'GTE' as ComparisonOperator,
-        thresholdValue: 90,
-        description: 'Velocidade >= 90 pontos indica excelência'
+        operator: 'LTE' as ComparisonOperator,
+        thresholdValue: 30,
+        description: 'Velocidade <= 30 pontos indica situação crítica'
       },
-      {
-        id: generateId(),
-        stateId: 1, // Bom
-        metricName: 'velocityPoints',
-        operator: 'GTE' as ComparisonOperator,
-        thresholdValue: 70,
-        description: 'Velocidade >= 70 pontos indica bom desempenho'
-      },
-      {
-        id: generateId(),
-        stateId: 2, // Estável
-        metricName: 'velocityPoints',
-        operator: 'GTE' as ComparisonOperator,
-        thresholdValue: 50,
-        description: 'Velocidade >= 50 pontos indica estabilidade'
-      },
-      // Critérios para Estado Em Risco
+      // Critério para Estado Em Risco
       {
         id: generateId(),
         stateId: 3, // Em Risco
@@ -169,14 +153,32 @@ export class RubricService {
         thresholdValue: 50,
         description: 'Velocidade < 50 pontos indica risco'
       },
-      // Critérios para Estado Crítico
+      // Critério para Estado Estável
       {
         id: generateId(),
-        stateId: 4, // Crítico
+        stateId: 2, // Estável
         metricName: 'velocityPoints',
-        operator: 'LTE' as ComparisonOperator,
-        thresholdValue: 30,
-        description: 'Velocidade <= 30 pontos indica situação crítica'
+        operator: 'GTE' as ComparisonOperator,
+        thresholdValue: 50,
+        description: 'Velocidade >= 50 pontos indica estabilidade'
+      },
+      // Critério para Estado Bom
+      {
+        id: generateId(),
+        stateId: 1, // Bom
+        metricName: 'velocityPoints',
+        operator: 'GTE' as ComparisonOperator,
+        thresholdValue: 70,
+        description: 'Velocidade >= 70 pontos indica bom desempenho'
+      },
+      // Critério para Estado Excelente
+      {
+        id: generateId(),
+        stateId: 0, // Excelente
+        metricName: 'velocityPoints',
+        operator: 'GTE' as ComparisonOperator,
+        thresholdValue: 90,
+        description: 'Velocidade >= 90 pontos indica excelência'
       }
     ];
 

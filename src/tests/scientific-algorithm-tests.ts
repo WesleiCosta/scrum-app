@@ -83,18 +83,34 @@ export class ScientificAlgorithmTests {
     const startTime = performance.now();
     
     try {
-      // Criar critérios de teste
+      // Criar critérios de teste corrigidos para 5 estados
       const testCriteria: RubricCriterion[] = [
         {
           id: 'crit_1',
-          stateId: 0, // Saudável
+          stateId: 0, // Excelente (mapeia para Saudável)
           metricName: 'velocity',
           operator: 'GTE',
-          thresholdValue: 80,
-          description: 'Velocidade >= 80 = Saudável'
+          thresholdValue: 90,
+          description: 'Velocidade >= 90 = Excelente'
         },
         {
           id: 'crit_2',
+          stateId: 1, // Bom (mapeia para Saudável)
+          metricName: 'velocity',
+          operator: 'GTE',
+          thresholdValue: 70,
+          description: 'Velocidade >= 70 = Bom'
+        },
+        {
+          id: 'crit_3',
+          stateId: 2, // Estável (mapeia para Em Risco)
+          metricName: 'velocity',
+          operator: 'GTE',
+          thresholdValue: 50,
+          description: 'Velocidade >= 50 = Estável'
+        },
+        {
+          id: 'crit_4',
           stateId: 3, // Em Risco
           metricName: 'velocity',
           operator: 'LT',

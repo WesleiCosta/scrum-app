@@ -25,6 +25,16 @@ export class ScrumMarkovEngine {
     sprintMetrics: Record<string, number>, 
     rubricCriteria: RubricCriterion[]
   ): UnifiedState {
+    // Validação de entrada
+    if (!sprintMetrics || typeof sprintMetrics !== 'object') {
+      console.warn('Métricas de sprint inválidas ou ausentes. Usando fallback.');
+      return 'Em Risco';
+    }
+    
+    if (!rubricCriteria || rubricCriteria.length === 0) {
+      console.warn('Critérios de rubrica ausentes. Usando fallback.');
+      return 'Em Risco';
+    }
     // Agrupar critérios por estado, ordenados por criticidade (3 -> 2 -> 1)
     const criteriaByState = rubricCriteria
       .sort((a, b) => b.stateId - a.stateId) // Ordem decrescente: Crítico -> Risco -> Saudável
@@ -36,7 +46,7 @@ export class ScrumMarkovEngine {
       }, {} as Record<number, RubricCriterion[]>);
 
     // Avaliar estados em ordem de criticidade (mais crítico primeiro)
-    for (const stateId of [2, 1, 0]) { // Crítico, Em Risco, Saudável
+    for (const stateId of [4, 3, 2, 1, 0]) { // Crítico, Em Risco, Estável, Bom, Excelente
       const criteria = criteriaByState[stateId];
       if (!criteria || criteria.length === 0) continue;
 
@@ -50,9 +60,9 @@ export class ScrumMarkovEngine {
       }
     }
 
-    // Fallback: se nenhuma regra correspondeu, usar o estado mais crítico
-    console.warn('Nenhum critério de rubrica correspondeu às métricas da sprint. Usando fallback para estado Crítico.');
-    return 'Crítico';
+    // Fallback: se nenhuma regra correspondeu, usar estado conservador
+    console.warn('Nenhum critério de rubrica correspondeu às métricas da sprint. Usando fallback para estado Em Risco.');
+    return 'Em Risco';
   }
 
   /**
@@ -66,7 +76,7 @@ export class ScrumMarkovEngine {
       case 'LTE': return metricValue <= criterion.thresholdValue;
       case 'GT': return metricValue > criterion.thresholdValue;
       case 'LT': return metricValue < criterion.thresholdValue;
-      case 'EQ': return Math.abs(metricValue - criterion.thresholdValue) < 0.001; // Tolerância para float
+      case 'EQ': return Math.abs(metricValue - criterion.thresholdValue) < 0.001; // Tolerância padronizada
       default: return false;
     }
   }
@@ -75,8 +85,14 @@ export class ScrumMarkovEngine {
    * Converte índice numérico para estado unificado
    */
   private static getStateByIndex(index: number): UnifiedState {
-    const stateMap = ['Saudável', 'Em Risco', 'Crítico'] as const;
-    return stateMap[index] || 'Em Risco';
+    // Mapear 5 estados para 3 estados unificados
+    // 0=Excelente, 1=Bom -> Saudável
+    // 2=Estável -> Em Risco
+    // 3=Em Risco, 4=Crítico -> Crítico
+    if (index <= 1) return 'Saudável';  // Excelente ou Bom
+    if (index === 2) return 'Em Risco';  // Estável 
+    if (index >= 3) return 'Crítico';   // Em Risco ou Crítico
+    return 'Em Risco'; // Fallback
   }
 
   /**
@@ -244,7 +260,7 @@ export class ScrumMarkovEngine {
    * Verifica se cada linha soma 1.0 com tolerância para ponto flutuante
    */
   static validateStochasticMatrix(matrix: TransitionMatrix): boolean {
-    const tolerance = 0.001;
+    const tolerance = 0.001; // Tolerância padronizada em todo o sistema
     
     return matrix.every(row => {
       const sum = row.reduce((acc, val) => acc + val, 0);
