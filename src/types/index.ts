@@ -1,5 +1,9 @@
-// Tipos para os estados do projeto Scrum-Markov
+// Tipos fundamentais para sistema Scrum-Markov
 export type ProjectState = 'CRÍTICO' | 'RISCO' | 'ESTÁVEL' | 'BOM' | 'EXCELENTE';
+export type UnifiedState = 'Saudável' | 'Em Risco' | 'Crítico';
+export type ProjectStatus = 'CALIBRATING' | 'ACTIVE';
+export type MatrixType = 'INITIAL' | 'DYNAMIC';
+export type ComparisonOperator = 'GTE' | 'LTE' | 'EQ' | 'GT' | 'LT';
 
 // Mapeamento de estados legados para compatibilidade
 export const LEGACY_STATE_MAP = {
@@ -18,15 +22,74 @@ export const STATE_INDEX_MAP = {
   'CRÍTICO': 4
 } as const;
 
-// Definições dos estados padrão
+// Sistema de Estados Unificados Scrum-Markov
+export const UNIFIED_STATE_MAP: { [key in UnifiedState]: number } = {
+  'Saudável': 0,
+  'Em Risco': 1, 
+  'Crítico': 2
+};
+
+// Critério de Rubrica - Implementação da Especificação Seção 2.2
+export interface RubricCriterion {
+  id: string;
+  stateId: number; // Referencia StateDefinition.id
+  metricName: string; // Chave da métrica no payload da sprint
+  operator: ComparisonOperator;
+  thresholdValue: number;
+  description?: string;
+}
+
+// Rubrica de Classificação - Seção 2.2
+export interface Rubric {
+  id: string;
+  projectId: string;
+  name: string;
+  isActive: boolean;
+  criteria: RubricCriterion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Definição de Estado - Implementação da Especificação Seção 1.2
 export interface StateDefinition {
-  id: ProjectState;
+  id: number; // Identificador numérico conforme especificação
+  projectId: string;
   name: string;
   description: string;
-  criteria: string[];
+  criticalityOrder: number; // Para avaliação ordenada (3=Crítico, 2=Risco, 1=Saudável)
   color: string;
   bgColor: string;
   borderColor: string;
+}
+
+// Matriz de Transição - Implementação da Especificação Seção 1.2
+export type TransitionMatrix = number[][];
+
+export interface TransitionMatrixSnapshot {
+  id: string;
+  projectId: string;
+  sprintId: string; // Sprint que gerou esta matriz
+  matrixType: MatrixType;
+  matrixPayload: TransitionMatrix; // Matriz NxN serializada
+  createdAt: string;
+  windowSize?: number; // Tamanho da janela N para matriz dinâmica
+}
+
+// Transição de Estados - Conceito lógico da Seção 1.2
+export interface StateTransition {
+  fromStateId: number;
+  toStateId: number;
+  fromSprintNumber: number;
+  toSprintNumber: number;
+  transitionDate: string;
+}
+
+// Previsão de Estado Futuro - Para algoritmo S_{t+k} = S_t × P^k
+export interface StatePrediction {
+  step: number; // k passos no futuro
+  probabilities: number[]; // Vetor de probabilidades por estado
+  confidence: 'Baixa' | 'Média' | 'Alta';
+  calculatedAt: string;
 }
 
 // Usuário
@@ -37,13 +100,16 @@ export interface User {
   createdAt: string;
 }
 
-// Projeto/Time
+// Projeto - Implementação da Especificação Seção 1.2
 export interface Project {
   id: string;
   name: string;
   description: string;
   adminId: string;
   memberIds: string[];
+  nValue: number; // Tamanho da janela deslizante N
+  status: ProjectStatus;
+  activeRubricId?: string;
   stateDefinitions: StateDefinition[];
   createdAt: string;
   updatedAt: string;
@@ -61,8 +127,8 @@ export interface SprintLog {
   updatedAt: string;
 }
 
-// Matriz de Transição
-export interface TransitionMatrix {
+// Matriz de Transição Legada - Mantida para compatibilidade
+export interface LegacyTransitionMatrix {
   projectId: string;
   matrix: number[][]; // 5x5 matrix
   lastUpdated: string;
@@ -105,7 +171,7 @@ export interface ProjectContextType {
 // Contexto de Sprint
 export interface SprintContextType {
   sprintLogs: SprintLog[];
-  transitionMatrix: TransitionMatrix | null;
+  transitionMatrix: LegacyTransitionMatrix | null;
   projections: StateProjection[];
   addSprintLog: (log: Omit<SprintLog, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateSprintLog: (logId: string, updates: Partial<SprintLog>) => Promise<void>;

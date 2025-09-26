@@ -72,10 +72,10 @@
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -744227079,
-      "lastModified" : 1758921171505
+      "contentHash" : 589084077,
+      "lastModified" : 1758924805085
     },
-    "linesOfCode" : 302
+    "linesOfCode" : 562
   }, {
     "path" : "src\\pages\\LoginPage.tsx",
     "modificationInfo" : {
@@ -107,10 +107,10 @@
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
-      "contentHash" : 1588402504,
-      "lastModified" : 1758898354838
+      "contentHash" : -1777149488,
+      "lastModified" : 1758924530031
     },
-    "linesOfCode" : 115
+    "linesOfCode" : 181
   }, {
     "path" : "src\\types\\metrics.ts",
     "modificationInfo" : {
@@ -139,6 +139,27 @@
       "lastModified" : 1758902718666
     },
     "linesOfCode" : 237
+  }, {
+    "path" : "src\\utils\\scrum-markov-api.ts",
+    "modificationInfo" : {
+      "contentHash" : -1259282219,
+      "lastModified" : 1758924761435
+    },
+    "linesOfCode" : 240
+  }, {
+    "path" : "src\\utils\\scrum-markov-engine.ts",
+    "modificationInfo" : {
+      "contentHash" : -1748869011,
+      "lastModified" : 1758924571281
+    },
+    "linesOfCode" : 308
+  }, {
+    "path" : "src\\utils\\simple-scrum-api.ts",
+    "modificationInfo" : {
+      "contentHash" : 1064793996,
+      "lastModified" : 1758924791411
+    },
+    "linesOfCode" : 233
   }, {
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
