@@ -1,74 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSprint } from '../contexts/SprintContext';
 import { useProject } from '../contexts/ProjectContext';
-import { 
-  calculateTransitionMatrixDetailed, 
-  calculateProjectionData, 
-  getStateNames, 
-  getHighRiskStates,
-  formatProbability,
-  MatrixInfo,
-  ProjectionData
-} from '../utils/markov';
 import { ProjectState } from '../types';
+
+// Tipos para implementação Scrum-Markov
+type UnifiedState = 'Saudável' | 'Em Risco' | 'Crítico';
+type TransitionMatrix = number[][];
 
 const DashboardPage: React.FC = () => {
   const { sprintLogs } = useSprint();
   const { currentProject } = useProject();
-  const [selectedState, setSelectedState] = useState<ProjectState>('ESTÁVEL');
-  const [matrixInfo, setMatrixInfo] = useState<MatrixInfo | null>(null);
-  const [projectionData, setProjectionData] = useState<ProjectionData | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<'executive' | 'statistical' | 'predictive'>('executive');
 
-  // RF-04: Recalcular matriz automaticamente quando sprints mudarem
-  useEffect(() => {
-    if (sprintLogs.length >= 2) {
-      const newMatrixInfo = calculateTransitionMatrixDetailed(sprintLogs);
-      setMatrixInfo(newMatrixInfo);
-    } else {
-      setMatrixInfo(null);
+  // Converter estados do sistema para estados unificados
+  const converterParaEstadoUnificado = (state: ProjectState): UnifiedState => {
+    switch (state) {
+      case 'EXCELENTE':
+      case 'BOM':
+        return 'Saudável';
+      case 'ESTÁVEL':
+        return 'Em Risco';
+      case 'RISCO':
+      case 'CRÍTICO':
+        return 'Crítico';
+      default:
+        return 'Em Risco';
     }
-  }, [sprintLogs]);
+  };
 
-  // RF-05: Recalcular projeções quando matriz ou estado selecionado mudarem
-  useEffect(() => {
-    if (matrixInfo && matrixInfo.matrix) {
-      const newProjectionData = calculateProjectionData(selectedState, matrixInfo.matrix);
-      setProjectionData(newProjectionData);
-    } else {
-      setProjectionData(null);
-    }
-  }, [matrixInfo, selectedState]);
-
-  // Inicializar estado selecionado com último sprint
-  useEffect(() => {
-    if (sprintLogs.length > 0) {
-      setSelectedState(sprintLogs[sprintLogs.length - 1].finalState);
-    }
-  }, [sprintLogs]);
-
-  const states = getStateNames();
-  const highRiskStates = getHighRiskStates();
-  const hasInsufficientData = sprintLogs.length < 2;
-
-  const getStateColor = (state: string, isHighRisk = false) => {
-    if (isHighRisk) return 'bg-red-100 text-red-800 border-red-200';
-    
-    const colors: { [key: string]: string } = {
-      'EXCELENTE': 'bg-green-100 text-green-800 border-green-200',
-      'BOM': 'bg-blue-100 text-blue-800 border-blue-200',
-      'ESTÁVEL': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'RISCO': 'bg-orange-100 text-orange-800 border-orange-200',
-      'CRÍTICO': 'bg-red-100 text-red-800 border-red-200'
+  // Algoritmo: Construir Matriz de Transição
+  const construirMatrizTransicao = (historicoEstados: UnifiedState[]): TransitionMatrix => {
+    const contagemTransicoes: number[][] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    const contagemEstadosOrigem = [0, 0, 0];
+    const mapaEstados: { [key in UnifiedState]: number } = {
+      'Saudável': 0, 'Em Risco': 1, 'Crítico': 2
     };
-    return colors[state] || 'bg-gray-100 text-gray-800 border-gray-200';
+
+    for (let t = 0; t < historicoEstados.length - 1; t++) {
+      const estadoOrigem = historicoEstados[t];
+      const estadoDestino = historicoEstados[t + 1];
+      const indiceOrigem = mapaEstados[estadoOrigem];
+      const indiceDestino = mapaEstados[estadoDestino];
+      
+      contagemTransicoes[indiceOrigem][indiceDestino] += 1;
+      contagemEstadosOrigem[indiceOrigem] += 1;
+    }
+
+    const P: TransitionMatrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+    for (let i = 0; i < 3; i++) {
+      if (contagemEstadosOrigem[i] > 0) {
+        for (let j = 0; j < 3; j++) {
+          P[i][j] = contagemTransicoes[i][j] / contagemEstadosOrigem[i];
+        }
+      } else {
+        P[i] = [1/3, 1/3, 1/3];
+      }
+    }
+    
+    return P;
+  };
+
+  // Calcular dados principais
+  const historicoEstadosUnificados: UnifiedState[] = sprintLogs.map(log => 
+    converterParaEstadoUnificado(log.finalState)
+  );
+  
+  const estadoAtual: UnifiedState = sprintLogs.length > 0 
+    ? converterParaEstadoUnificado(sprintLogs[sprintLogs.length - 1].finalState) 
+    : 'Em Risco';
+    
+  const matrizTransicao: TransitionMatrix = historicoEstadosUnificados.length >= 2 
+    ? construirMatrizTransicao(historicoEstadosUnificados) 
+    : [[1/3, 1/3, 1/3], [1/3, 1/3, 1/3], [1/3, 1/3, 1/3]];
+
+  const formatarProbabilidade = (prob: number): string => `${Math.round(prob * 100)}%`;
+
+  const getCoresEstado = (estado: UnifiedState) => {
+    switch (estado) {
+      case 'Saudável':
+        return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', icon: '✅' };
+      case 'Em Risco':
+        return { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', icon: '⚠️' };
+      case 'Crítico':
+        return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', icon: '🚨' };
+    }
   };
 
   if (!currentProject) {
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">📊</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
-        <p className="text-gray-600">Selecione um projeto para visualizar o dashboard.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard Scrum-Markov</h2>
+        <p className="text-gray-600">Selecione um projeto para visualizar os dashboards preditivos.</p>
       </div>
     );
   }
@@ -79,228 +103,197 @@ const DashboardPage: React.FC = () => {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">📊 Dashboard Preditivo</h1>
-          <p className="text-gray-600 mt-2">Análise Markoviana para {currentProject.name}</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">📊 Dashboard Scrum-Markov</h1>
+          <p className="text-gray-600 mb-6">Metodologia preditiva para {currentProject.name}</p>
+          
+          {/* Seletor de Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {[
+              { id: 'executive', title: '👔 Visualização Executiva', desc: 'Visão geral do estado de saúde' },
+              { id: 'statistical', title: '📈 Análise Estatística', desc: 'Matriz de transição detalhada' },
+              { id: 'predictive', title: '🔮 Insights Preditivos', desc: 'Previsões e recomendações' }
+            ].map(dash => (
+              <button
+                key={dash.id}
+                onClick={() => setSelectedDashboard(dash.id as any)}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                  selectedDashboard === dash.id
+                    ? 'border-blue-500 bg-blue-50 text-blue-900'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="font-semibold text-lg">{dash.title}</div>
+                <div className="text-sm opacity-80">{dash.desc}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {hasInsufficientData ? (
-          <div className="bg-white p-8 rounded-xl shadow-lg border text-center">
-            <div className="text-6xl mb-4">📈</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Dados Insuficientes</h2>
-            <p className="text-gray-600 mb-4">
-              São necessários pelo menos 2 sprints para calcular a matriz de transição.
-            </p>
-            <p className="text-sm text-gray-500">
-              Sprints registrados: {sprintLogs.length}/2 mínimos
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Dashboard Executivo */}
+        {selectedDashboard === 'executive' && (
+          <div className="space-y-8">
             
-            {/* RF-05: Seletor de Estado Atual */}
+            {/* Medidor de Saúde */}
+            <div className="bg-white p-8 rounded-xl shadow-lg border">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">🎯 Estado de Saúde Unificado</h2>
+              
+              <div className="flex justify-center mb-6">
+                <div className={`w-56 h-56 rounded-full border-8 flex items-center justify-center ${getCoresEstado(estadoAtual).bg} ${getCoresEstado(estadoAtual).border}`}>
+                  <div className="text-center">
+                    <div className="text-5xl mb-3">{getCoresEstado(estadoAtual).icon}</div>
+                    <div className={`text-2xl font-bold ${getCoresEstado(estadoAtual).text}`}>{estadoAtual}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-center text-gray-600">
+                Sprint atual: {sprintLogs.length} | Baseado em {historicoEstadosUnificados.length} sprints
+              </p>
+            </div>
+
+            {/* KPIs */}
             <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">🎯 Estado Atual do Projeto</h2>
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Selecione o estado atual para análise preditiva:
-                </label>
-                <select 
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value as ProjectState)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {states.map(state => (
-                    <option key={state} value={state}>{state}</option>
-                  ))}
-                </select>
-                <div className="text-center mt-4">
-                  <span className={`inline-flex items-center px-4 py-2 rounded-lg text-lg font-semibold ${getStateColor(selectedState)}`}>
-                    {selectedState}
-                  </span>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">📊 Indicadores-Chave</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-3xl font-bold text-blue-600">{sprintLogs.length}</div>
+                  <div className="text-sm text-gray-600">Sprints Total</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-3xl font-bold text-green-600">
+                    {Math.round((historicoEstadosUnificados.filter(e => e === 'Saudável').length / Math.max(historicoEstadosUnificados.length, 1)) * 100)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Taxa Saudável</div>
+                </div>
+                <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                  <div className="text-3xl font-bold text-yellow-600">
+                    {Math.round((historicoEstadosUnificados.filter(e => e === 'Em Risco').length / Math.max(historicoEstadosUnificados.length, 1)) * 100)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Taxa Risco</div>
+                </div>
+                <div className="text-center p-4 bg-red-50 rounded-lg">
+                  <div className="text-3xl font-bold text-red-600">
+                    {Math.round((historicoEstadosUnificados.filter(e => e === 'Crítico').length / Math.max(historicoEstadosUnificados.length, 1)) * 100)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Taxa Crítica</div>
                 </div>
               </div>
             </div>
+          </div>
+        )}
 
-            {/* RF-05: Matriz de Transição 5x5 */}
+        {/* Dashboard Estatístico */}
+        {selectedDashboard === 'statistical' && (
+          <div className="space-y-8">
+            
+            {/* Matriz de Transição */}
             <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">🔢 Matriz de Transição 5x5</h2>
-              {matrixInfo && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr>
-                        <th className="text-left p-2 font-semibold">De \ Para</th>
-                        {states.map(state => (
-                          <th key={state} className={`text-center p-2 text-xs font-semibold ${getStateColor(state, highRiskStates.includes(state))}`}>
-                            {state.slice(0, 3)}
-                          </th>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">🔢 Matriz de Transição</h2>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr>
+                      <th className="border border-gray-300 p-3 bg-gray-100">De ↓ / Para →</th>
+                      {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map(estado => (
+                        <th key={estado} className={`border border-gray-300 p-3 ${getCoresEstado(estado).bg}`}>
+                          {estado}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
+                      <tr key={fromState}>
+                        <td className={`border border-gray-300 p-3 font-semibold ${getCoresEstado(fromState).bg}`}>
+                          {fromState}
+                        </td>
+                        {matrizTransicao[i].map((value, j) => (
+                          <td key={j} className="border border-gray-300 p-3 text-center"
+                              style={{ backgroundColor: `rgba(59, 130, 246, ${value * 0.7})` }}>
+                            {formatarProbabilidade(value)}
+                          </td>
                         ))}
                       </tr>
-                    </thead>
-                    <tbody>
-                      {states.map((fromState, i) => (
-                        <tr key={fromState} className="border-t">
-                          <td className={`p-2 font-semibold text-xs ${getStateColor(fromState, highRiskStates.includes(fromState))}`}>
-                            {fromState.slice(0, 3)}
-                          </td>
-                          {states.map((toState, j) => {
-                            const value = matrixInfo.matrix[i][j];
-                            const isHighRisk = highRiskStates.includes(toState);
-                            return (
-                              <td key={toState} className={`text-center p-2 text-xs ${isHighRisk && value > 0.3 ? 'bg-red-50 font-bold text-red-700' : ''}`}>
-                                {formatProbability(value)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            {/* RF-05: Projeções para 3 Sprints */}
-            <div className="xl:col-span-2 bg-white p-6 rounded-xl shadow-lg border">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">🔮 Projeções para Próximos 3 Sprints</h2>
-              {projectionData && (
-                <div className="space-y-6">
-                  {/* Tabela de Probabilidades */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr>
-                          <th className="text-left p-3 font-semibold">Sprint</th>
-                          {states.map(state => (
-                            <th key={state} className={`text-center p-3 ${getStateColor(state, highRiskStates.includes(state))}`}>
-                              {state}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-t bg-blue-50">
-                          <td className="p-3 font-semibold">Atual</td>
-                          {states.map(state => (
-                            <td key={state} className="text-center p-3 font-medium">
-                              {formatProbability(projectionData.current[state])}
-                            </td>
-                          ))}
-                        </tr>
-                        <tr className="border-t">
-                          <td className="p-3 font-semibold">Sprint +1</td>
-                          {states.map(state => {
-                            const value = projectionData.sprint1[state];
-                            const isHighRisk = highRiskStates.includes(state) && value > 0.3;
-                            return (
-                              <td key={state} className={`text-center p-3 ${isHighRisk ? 'bg-red-100 font-bold text-red-700' : 'font-medium'}`}>
-                                {formatProbability(value)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-t">
-                          <td className="p-3 font-semibold">Sprint +2</td>
-                          {states.map(state => {
-                            const value = projectionData.sprint2[state];
-                            const isHighRisk = highRiskStates.includes(state) && value > 0.3;
-                            return (
-                              <td key={state} className={`text-center p-3 ${isHighRisk ? 'bg-red-100 font-bold text-red-700' : 'font-medium'}`}>
-                                {formatProbability(value)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-t">
-                          <td className="p-3 font-semibold">Sprint +3</td>
-                          {states.map(state => {
-                            const value = projectionData.sprint3[state];
-                            const isHighRisk = highRiskStates.includes(state) && value > 0.3;
-                            return (
-                              <td key={state} className={`text-center p-3 ${isHighRisk ? 'bg-red-100 font-bold text-red-700' : 'font-medium'}`}>
-                                {formatProbability(value)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      </tbody>
-                    </table>
+            {/* Histórico de Transições */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">🔄 Histórico de Transições</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {historicoEstadosUnificados.length > 1 ? 
+                  historicoEstadosUnificados.slice(1).map((estado, index) => {
+                    const estadoAnterior = historicoEstadosUnificados[index];
+                    return (
+                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-600">
+                          Sprint {index + 1} → {index + 2}:
+                        </span>
+                        <span className={`px-3 py-1 rounded text-sm font-medium ${getCoresEstado(estadoAnterior).bg} ${getCoresEstado(estadoAnterior).text}`}>
+                          {estadoAnterior}
+                        </span>
+                        <span className="text-gray-400">→</span>
+                        <span className={`px-3 py-1 rounded text-sm font-medium ${getCoresEstado(estado).bg} ${getCoresEstado(estado).text}`}>
+                          {estado}
+                        </span>
+                      </div>
+                    );
+                  })
+                : (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhuma transição registrada ainda
                   </div>
-
-                  {/* RF-06: Gráfico de Evolução das Probabilidades */}
-                  <div className="mt-8">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">📈 Evolução das Probabilidades</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      {states.map(state => {
-                        const data = [
-                          projectionData.current[state],
-                          projectionData.sprint1[state], 
-                          projectionData.sprint2[state],
-                          projectionData.sprint3[state]
-                        ];
-                        const maxValue = Math.max(...data);
-                        const isHighRisk = highRiskStates.includes(state);
-                        
-                        return (
-                          <div key={state} className="mb-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className={`font-medium ${isHighRisk ? 'text-red-600' : 'text-gray-700'}`}>
-                                {state}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                Máx: {formatProbability(maxValue)}
-                              </span>
-                            </div>
-                            <div className="flex items-end space-x-2 h-16">
-                              {data.map((value, index) => (
-                                <div key={index} className="flex-1 flex flex-col items-center">
-                                  <div 
-                                    className={`w-full ${isHighRisk && value > 0.3 ? 'bg-red-400' : state === 'EXCELENTE' ? 'bg-green-400' : state === 'BOM' ? 'bg-blue-400' : state === 'ESTÁVEL' ? 'bg-yellow-400' : 'bg-gray-400'} rounded-t transition-all duration-500`}
-                                    style={{ 
-                                      height: `${Math.max(value * 60, 2)}px`,
-                                      opacity: value === 0 ? 0.3 : 0.8 
-                                    }}
-                                    title={`${['Atual', 'S+1', 'S+2', 'S+3'][index]}: ${formatProbability(value)}`}
-                                  />
-                                  <span className="text-xs text-gray-500 mt-1">
-                                    {['Atual', 'S+1', 'S+2', 'S+3'][index]}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Informações da Matriz */}
-        {matrixInfo && (
-          <div className="mt-8 bg-white p-6 rounded-xl shadow-lg border">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">ℹ️ Informações da Matriz</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{matrixInfo.totalTransitions}</div>
-                <div className="text-gray-600">Transições Total</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{sprintLogs.length}</div>
-                <div className="text-gray-600">Sprints Analisados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {((matrixInfo.totalTransitions / Math.max(sprintLogs.length - 1, 1)) * 100).toFixed(0)}%
+        {/* Dashboard Preditivo */}
+        {selectedDashboard === 'predictive' && (
+          <div className="space-y-8">
+            
+            {/* Nível de Confiança */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Nível de Confiança</h3>
+              <div className="flex items-center justify-between">
+                <p className="text-gray-600">
+                  Baseado em {sprintLogs.length} sprints de dados
+                </p>
+                <div className={`text-xl font-bold ${
+                  sprintLogs.length < 6 ? 'text-red-600' :
+                  sprintLogs.length < 12 ? 'text-yellow-600' : 'text-green-600'
+                }`}>
+                  {sprintLogs.length < 6 ? 'Baixa' :
+                   sprintLogs.length < 12 ? 'Média' : 'Alta'}
                 </div>
-                <div className="text-gray-600">Cobertura de Dados</div>
               </div>
+              <div className="mt-4 w-full bg-gray-200 rounded-full h-3">
+                <div className={`h-3 rounded-full ${
+                  sprintLogs.length < 6 ? 'bg-red-400' :
+                  sprintLogs.length < 12 ? 'bg-yellow-400' : 'bg-green-400'
+                }`} style={{ width: `${Math.min((sprintLogs.length / 12) * 100, 100)}%` }} />
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border text-center">
+              <div className="text-4xl mb-4">🔮</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Dashboard Preditivo</h3>
+              <p className="text-gray-600">
+                {sprintLogs.length < 2 
+                  ? 'São necessárias pelo menos 2 sprints para análises preditivas'
+                  : 'Funcionalidades preditivas avançadas serão implementadas em breve'
+                }
+              </p>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
