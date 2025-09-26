@@ -8,7 +8,7 @@ function ConfigurationPage() {
     currentProject?.stateDefinitions || []
   );
   const [loading, setLoading] = useState(false);
-  const [editingState, setEditingState] = useState<string | null>(null);
+  const [editingState, setEditingState] = useState<number | null>(null);
 
   if (!currentProject) {
     return (
@@ -36,35 +36,17 @@ function ConfigurationPage() {
     }
   };
 
-  const updateDefinition = (stateId: string, field: keyof StateDefinition, value: any) => {
+  const updateDefinition = (stateId: number, field: keyof StateDefinition, value: any) => {
     setDefinitions(prev => prev.map(def => 
       def.id === stateId ? { ...def, [field]: value } : def
     ));
   };
 
-  const addCriteria = (stateId: string) => {
-    const definition = definitions.find(def => def.id === stateId);
-    if (definition) {
-      updateDefinition(stateId, 'criteria', [...definition.criteria, '']);
-    }
-  };
+  // Função removida: criteria não existe mais no StateDefinition
 
-  const updateCriteria = (stateId: string, index: number, value: string) => {
-    const definition = definitions.find(def => def.id === stateId);
-    if (definition) {
-      const newCriteria = [...definition.criteria];
-      newCriteria[index] = value;
-      updateDefinition(stateId, 'criteria', newCriteria);
-    }
-  };
+  // Função removida: criteria não existe mais no StateDefinition
 
-  const removeCriteria = (stateId: string, index: number) => {
-    const definition = definitions.find(def => def.id === stateId);
-    if (definition) {
-      const newCriteria = definition.criteria.filter((_, i) => i !== index);
-      updateDefinition(stateId, 'criteria', newCriteria);
-    }
-  };
+  // Função removida: criteria não existe mais no StateDefinition
 
   return (
     <div className="space-y-6">
@@ -134,45 +116,7 @@ function ConfigurationPage() {
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Critérios de Avaliação
-                    </label>
-                    <div className="space-y-2">
-                      {definition.criteria.map((criteria, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <span className="text-gray-400">•</span>
-                          {editingState === definition.id ? (
-                            <>
-                              <input
-                                type="text"
-                                value={criteria}
-                                onChange={(e) => updateCriteria(definition.id, index, e.target.value)}
-                                className="flex-1 input"
-                                placeholder="Critério de avaliação"
-                              />
-                              <button
-                                onClick={() => removeCriteria(definition.id, index)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-sm text-gray-600">{criteria}</span>
-                          )}
-                        </div>
-                      ))}
-                      {editingState === definition.id && (
-                        <button
-                          onClick={() => addCriteria(definition.id)}
-                          className="text-sm text-primary-600 hover:text-primary-700"
-                        >
-                          + Adicionar Critério
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  {/* Seção de critérios removida - agora gerenciada pelo sistema de rubrica */}
                 </div>
               </div>
             ))}

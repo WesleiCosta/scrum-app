@@ -1,4 +1,4 @@
-import { User, Project, SprintLog, TransitionMatrix, LEGACY_STATE_MAP, ProjectState } from '../types';
+import { User, Project, SprintLog, LegacyTransitionMatrix, LEGACY_STATE_MAP, ProjectState } from '../types';
 import { STORAGE_KEYS } from './constants';
 
 // Função para verificar se localStorage está disponível
@@ -141,13 +141,13 @@ export const sprintLogsStorage = {
 };
 
 export const transitionMatricesStorage = {
-  get: (): TransitionMatrix[] => getStorageItem(STORAGE_KEYS.TRANSITION_MATRICES, []),
-  set: (matrices: TransitionMatrix[]) => setStorageItem(STORAGE_KEYS.TRANSITION_MATRICES, matrices),
-  getByProject: (projectId: string): TransitionMatrix | null => {
+  get: (): LegacyTransitionMatrix[] => getStorageItem(STORAGE_KEYS.TRANSITION_MATRICES, []),
+  set: (matrices: LegacyTransitionMatrix[]) => setStorageItem(STORAGE_KEYS.TRANSITION_MATRICES, matrices),
+  getByProject: (projectId: string): LegacyTransitionMatrix | null => {
     const matrices = transitionMatricesStorage.get();
     return matrices.find(m => m.projectId === projectId) || null;
   },
-  upsert: (matrix: TransitionMatrix) => {
+  upsert: (matrix: LegacyTransitionMatrix) => {
     const matrices = transitionMatricesStorage.get();
     const index = matrices.findIndex(m => m.projectId === matrix.projectId);
     

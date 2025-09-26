@@ -11,10 +11,8 @@
 import { 
   UnifiedState, 
   TransitionMatrix, 
-  TransitionMatrixSnapshot, 
   StatePrediction, 
-  RubricCriterion, 
-  ComparisonOperator,
+  RubricCriterion,
   UNIFIED_STATE_MAP 
 } from '../types';
 
@@ -158,7 +156,7 @@ export class ScrumMarkovEngine {
       predictions.push({
         step: k,
         probabilities: [...nextVector],
-        confidence: this.calculateConfidence(k, steps),
+        confidence: this.calculateConfidence(k),
         calculatedAt: new Date().toISOString()
       });
 
@@ -195,7 +193,7 @@ export class ScrumMarkovEngine {
   /**
    * Calcula nível de confiança baseado no número de passos
    */
-  private static calculateConfidence(currentStep: number, totalSteps: number): 'Baixa' | 'Média' | 'Alta' {
+  private static calculateConfidence(currentStep: number): 'Baixa' | 'Média' | 'Alta' {
     if (currentStep <= 2) return 'Alta';
     if (currentStep <= 5) return 'Média';
     return 'Baixa';

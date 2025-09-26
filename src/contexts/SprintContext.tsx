@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { SprintLog, SprintContextType, TransitionMatrix, StateProjection, ProjectState } from '../types';
+import { SprintLog, SprintContextType, LegacyTransitionMatrix, StateProjection, ProjectState } from '../types';
 import { sprintLogsStorage, transitionMatricesStorage, generateId } from '../utils/storage';
 import { calculateTransitionMatrix, calculateProjections } from '../utils/markov';
 import { useProject } from './ProjectContext';
@@ -14,7 +14,7 @@ interface SprintProviderProps {
 export function SprintProvider({ children }: SprintProviderProps) {
   const { currentProject } = useProject();
   const [sprintLogs, setSprintLogs] = useState<SprintLog[]>([]);
-  const [transitionMatrix, setTransitionMatrix] = useState<TransitionMatrix | null>(null);
+  const [transitionMatrix, setTransitionMatrix] = useState<LegacyTransitionMatrix | null>(null);
   const [projections, setProjections] = useState<StateProjection[]>([]);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function SprintProvider({ children }: SprintProviderProps) {
       // Recalcula matriz se necessário
       if (!matrix || logs.length > 0) {
         const updatedMatrix = calculateTransitionMatrix(logs);
-        const newTransitionMatrix: TransitionMatrix = {
+        const newTransitionMatrix: LegacyTransitionMatrix = {
           projectId: currentProject.id,
           matrix: updatedMatrix,
           lastUpdated: new Date().toISOString()
@@ -166,7 +166,7 @@ export function SprintProvider({ children }: SprintProviderProps) {
       
       const matrix = calculateTransitionMatrix(logs);
       
-      const newTransitionMatrix: TransitionMatrix = {
+      const newTransitionMatrix: LegacyTransitionMatrix = {
         projectId: currentProject.id,
         matrix,
         lastUpdated: new Date().toISOString()

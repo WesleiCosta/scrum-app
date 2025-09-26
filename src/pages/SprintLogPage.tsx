@@ -55,7 +55,7 @@ function SprintLogPage() {
     // Apenas impedir duração negativa
     
     // Validar estado final
-    const validStates = currentProject.stateDefinitions.map(def => def.id);
+    const validStates: ProjectState[] = ['EXCELENTE', 'BOM', 'ESTÁVEL', 'RISCO', 'CRÍTICO'];
     if (!newSprint.finalState || !validStates.includes(newSprint.finalState)) {
       console.error('Erro: Estado final é obrigatório e deve ser válido');
       return;
@@ -144,7 +144,16 @@ function SprintLogPage() {
   };
 
   const getStateName = (state: ProjectState) => {
-    return currentProject.stateDefinitions.find(def => def.id === state)?.name || state;
+    // Mapear ProjectState (string) para StateDefinition (id numérico)
+    const stateIdMap: { [key in ProjectState]: number } = {
+      'EXCELENTE': 0,
+      'BOM': 1,
+      'ESTÁVEL': 2,
+      'RISCO': 3,
+      'CRÍTICO': 4
+    };
+    const stateId = stateIdMap[state];
+    return currentProject.stateDefinitions.find(def => def.id === stateId)?.name || state;
   };
 
   return (

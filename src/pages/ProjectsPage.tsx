@@ -21,6 +21,8 @@ function ProjectsPage() {
         name: newProject.name,
         description: newProject.description,
         memberIds: [],
+        nValue: 10, // Padrão conforme especificação
+        status: 'CALIBRATING', // Status inicial
         stateDefinitions: [], // Add an empty array or provide initial state definitions as needed
       });
       setCurrentProject(project);

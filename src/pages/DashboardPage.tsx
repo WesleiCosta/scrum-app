@@ -339,7 +339,7 @@ const DashboardPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {previsoes.slice(0, 5).map((predicao, index) => {
+                      {previsoes.slice(0, 5).map((predicao) => {
                         const sprintNumber = sprintLogs.length + predicao.step;
                         return (
                           <tr key={predicao.step}>
