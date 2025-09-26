@@ -31,7 +31,11 @@ function SprintLogPage() {
 
   const handleAddSprint = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSprint.sprintDurationDays || newSprint.sprintDurationDays <= 0) return;
+    // Permitir duração zero apenas para o primeiro sprint
+    const isFirstSprint = sprintLogs.length === 0;
+    if (!newSprint.sprintDurationDays && newSprint.sprintDurationDays !== 0) return;
+    if (newSprint.sprintDurationDays < 0) return;
+    if (!isFirstSprint && newSprint.sprintDurationDays <= 0) return;
 
     setLoading(true);
     try {
@@ -42,15 +46,15 @@ function SprintLogPage() {
       // Calcular data de término
       let endDate: string;
       if (sprintLogs.length === 0) {
-        // Primeiro sprint: data atual + duração
+        // Primeiro sprint: data atual + duração informada (pode ser 0)
         const today = new Date();
         const endDateObj = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
-        // Sprints subsequentes: última data de término + duração
+        // Sprints subsequentes: última data de término + 15 dias fixos
         const lastSprint = sprintLogs[sprintLogs.length - 1];
         const lastEndDate = new Date(lastSprint.endDate);
-        const endDateObj = new Date(lastEndDate.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
+        const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
         endDate = endDateObj.toISOString().split('T')[0];
       }
       
@@ -128,11 +132,11 @@ function SprintLogPage() {
                       } else {
                         const lastSprint = sprintLogs[sprintLogs.length - 1];
                         const lastEndDate = new Date(lastSprint.endDate);
-                        const endDate = new Date(lastEndDate.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
+                        const endDate = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       }
                     })()} 
-                    ({newSprint.sprintDurationDays} dias após {sprintLogs.length === 0 ? 'hoje' : 'último sprint'})
+                    ({sprintLogs.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint'})
                   </p>
                 </div>
               </div>
@@ -148,10 +152,10 @@ function SprintLogPage() {
                   type="number"
                   className="input"
                   placeholder="14"
-                  min="1"
+                  min="0"
                   max="60"
                   value={newSprint.sprintDurationDays}
-                  onChange={(e) => setNewSprint({...newSprint, sprintDurationDays: parseInt(e.target.value) || 14})}
+                  onChange={(e) => setNewSprint({...newSprint, sprintDurationDays: parseInt(e.target.value) || 0})}
                   required
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

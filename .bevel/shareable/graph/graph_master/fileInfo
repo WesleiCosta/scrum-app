@@ -93,10 +93,10 @@
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
-      "contentHash" : 769705672,
-      "lastModified" : 1758907470015
+      "contentHash" : -1599876631,
+      "lastModified" : 1758907985794
     },
-    "linesOfCode" : 392
+    "linesOfCode" : 396
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
