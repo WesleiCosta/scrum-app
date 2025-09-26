@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useProject } from '../contexts/ProjectContext';
 import { useSprint } from '../contexts/SprintContext';
 import { ProjectState } from '../types';
-import { formatDate } from '../utils/storage';
+import { formatDate, sprintLogsStorage } from '../utils/storage';
 
 function SprintLogPage() {
   const { currentProject } = useProject();
@@ -39,20 +39,22 @@ function SprintLogPage() {
 
     setLoading(true);
     try {
-      // Calcular número do próximo sprint
-      const nextSprintNumber = sprintLogs.length + 1;
+      // Buscar sprints mais recentes do storage para garantir numeração correta
+      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
+      const nextSprintNumber = currentSprints.length + 1;
       const sprintName = `Sprint ${nextSprintNumber}`;
       
       // Calcular data de término
       let endDate: string;
-      if (sprintLogs.length === 0) {
+      if (currentSprints.length === 0) {
         // Primeiro sprint: data atual + duração informada (pode ser 0)
         const today = new Date();
         const endDateObj = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
         // Sprints subsequentes: última data de término + 15 dias fixos
-        const lastSprint = sprintLogs[sprintLogs.length - 1];
+        const sortedSprints = currentSprints.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+        const lastSprint = sortedSprints[0];
         const lastEndDate = new Date(lastSprint.endDate);
         const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
         endDate = endDateObj.toISOString().split('T')[0];
@@ -119,24 +121,32 @@ function SprintLogPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-blue-700 font-medium">Nome do Sprint:</span>
-                  <p className="text-blue-800">Sprint {sprintLogs.length + 1}</p>
+                  <p className="text-blue-800">Sprint {(() => {
+                    const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
+                    return currentSprints.length + 1;
+                  })()}</p>
                 </div>
                 <div>
                   <span className="text-blue-700 font-medium">Data de Término:</span>
                   <p className="text-blue-800">
                     {(() => {
-                      if (sprintLogs.length === 0) {
+                      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
+                      if (currentSprints.length === 0) {
                         const today = new Date();
                         const endDate = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       } else {
-                        const lastSprint = sprintLogs[sprintLogs.length - 1];
+                        const sortedSprints = currentSprints.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+                        const lastSprint = sortedSprints[0];
                         const lastEndDate = new Date(lastSprint.endDate);
                         const endDate = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       }
                     })()} 
-                    ({sprintLogs.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint'})
+                    ({(() => {
+                      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
+                      return currentSprints.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint';
+                    })()})
                   </p>
                 </div>
               </div>
