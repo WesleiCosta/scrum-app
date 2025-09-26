@@ -27,8 +27,13 @@ export function calculateTransitionMatrix(sprintLogs: SprintLog[]): number[][] {
     const fromState = stateToIndex(sortedLogs[i].finalState);
     const toState = stateToIndex(sortedLogs[i + 1].finalState);
     
-    transitionCounts[fromState][toState]++;
-    stateCounts[fromState]++;
+    // Validar se os índices são válidos
+    if (fromState >= 0 && fromState < 5 && toState >= 0 && toState < 5) {
+      transitionCounts[fromState][toState]++;
+      stateCounts[fromState]++;
+    } else {
+      console.warn('Estado inválido encontrado nos logs:', sortedLogs[i].finalState, sortedLogs[i + 1].finalState);
+    }
   }
 
   // Calcula probabilidades
@@ -51,9 +56,27 @@ export function calculateProjections(
 ): StateProjection[] {
   const projections: StateProjection[] = [];
   
+  // Validações de entrada
+  if (!currentState || !transitionMatrix || numSprints <= 0) {
+    return projections;
+  }
+  
+  // Verificar se a matriz tem o tamanho correto
+  if (transitionMatrix.length !== 5 || !transitionMatrix.every(row => row.length === 5)) {
+    console.warn('Matriz de transição com dimensões incorretas');
+    return projections;
+  }
+  
   // Vetor de estado atual (one-hot encoding)
   let currentVector: number[] = Array(5).fill(0);
   const currentIndex = STATE_INDEX_MAP[currentState];
+  
+  // Validar se o estado atual é válido
+  if (currentIndex === undefined || currentIndex < 0 || currentIndex >= 5) {
+    console.warn('Estado atual inválido:', currentState);
+    return projections;
+  }
+  
   currentVector[currentIndex] = 1;
 
   for (let sprint = 1; sprint <= numSprints; sprint++) {

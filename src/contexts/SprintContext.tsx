@@ -56,6 +56,11 @@ export function SprintProvider({ children }: SprintProviderProps) {
   };
 
   const addSprintLog = async (log: Omit<SprintLog, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> => {
+    if (!currentProject) {
+      console.error('Erro: Nenhum projeto selecionado para adicionar sprint');
+      return;
+    }
+
     const newLog: SprintLog = {
       ...log,
       id: generateId(),
@@ -66,33 +71,43 @@ export function SprintProvider({ children }: SprintProviderProps) {
     sprintLogsStorage.add(newLog);
     
     // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
     setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
-    setTimeout(() => refreshMatrix(), 100);
+    refreshMatrix();
   };
 
   const updateSprintLog = async (logId: string, updates: Partial<SprintLog>): Promise<void> => {
+    if (!currentProject) {
+      console.error('Erro: Nenhum projeto selecionado para atualizar sprint');
+      return;
+    }
+
     sprintLogsStorage.update(logId, updates);
     
     // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
     setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
-    setTimeout(() => refreshMatrix(), 100);
+    refreshMatrix();
   };
 
   const deleteSprintLog = async (logId: string): Promise<void> => {
+    if (!currentProject) {
+      console.error('Erro: Nenhum projeto selecionado para deletar sprint');
+      return;
+    }
+
     sprintLogsStorage.remove(logId);
     
     // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
     setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
-    setTimeout(() => refreshMatrix(), 100);
+    refreshMatrix();
   };
 
   const refreshMatrix = () => {

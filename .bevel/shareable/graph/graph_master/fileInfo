@@ -44,10 +44,10 @@
   }, {
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
-      "contentHash" : 2075515654,
-      "lastModified" : 1758908859695
+      "contentHash" : 688955058,
+      "lastModified" : 1758909466630
     },
-    "linesOfCode" : 166
+    "linesOfCode" : 181
   }, {
     "path" : "src\\main.tsx",
     "modificationInfo" : {
@@ -93,10 +93,10 @@
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -1478763697,
-      "lastModified" : 1758908831095
+      "contentHash" : -2125617656,
+      "lastModified" : 1758909371308
     },
-    "linesOfCode" : 406
+    "linesOfCode" : 419
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
@@ -121,10 +121,10 @@
   }, {
     "path" : "src\\utils\\markov.ts",
     "modificationInfo" : {
-      "contentHash" : 1523773498,
-      "lastModified" : 1758899804230
+      "contentHash" : 270761476,
+      "lastModified" : 1758909392176
     },
-    "linesOfCode" : 153
+    "linesOfCode" : 176
   }, {
     "path" : "src\\utils\\quantified-states.ts",
     "modificationInfo" : {
@@ -135,10 +135,10 @@
   }, {
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
-      "contentHash" : -374806545,
-      "lastModified" : 1758898354858
+      "contentHash" : 1510562399,
+      "lastModified" : 1758909412384
     },
-    "linesOfCode" : 158
+    "linesOfCode" : 180
   }, {
     "path" : "src\\utils\\tools-integration.ts",
     "modificationInfo" : {

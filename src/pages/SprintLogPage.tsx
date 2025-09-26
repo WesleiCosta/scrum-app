@@ -31,11 +31,24 @@ function SprintLogPage() {
 
   const handleAddSprint = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validações de entrada
+    if (!currentProject) {
+      console.error('Erro: Nenhum projeto selecionado');
+      return;
+    }
+
     // Permitir duração zero apenas para o primeiro sprint
     const isFirstSprint = sprintLogs.length === 0;
-    if (!newSprint.sprintDurationDays && newSprint.sprintDurationDays !== 0) return;
+    if (newSprint.sprintDurationDays === null || newSprint.sprintDurationDays === undefined) return;
     if (newSprint.sprintDurationDays < 0) return;
     if (!isFirstSprint && newSprint.sprintDurationDays <= 0) return;
+    
+    // Validar estado final
+    if (!newSprint.finalState) {
+      console.error('Erro: Estado final é obrigatório');
+      return;
+    }
 
     setLoading(true);
     try {

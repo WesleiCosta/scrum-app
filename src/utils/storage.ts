@@ -1,8 +1,25 @@
 import { User, Project, SprintLog, TransitionMatrix, LEGACY_STATE_MAP, ProjectState } from '../types';
 import { STORAGE_KEYS } from './constants';
 
+// Função para verificar se localStorage está disponível
+function isLocalStorageAvailable(): boolean {
+  try {
+    const testKey = '__localStorage_test__';
+    localStorage.setItem(testKey, 'test');
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Funções genéricas para localStorage
 export function setStorageItem<T>(key: string, value: T): void {
+  if (!isLocalStorageAvailable()) {
+    console.warn('localStorage não está disponível. Dados não serão persistidos.');
+    return;
+  }
+  
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
@@ -11,6 +28,11 @@ export function setStorageItem<T>(key: string, value: T): void {
 }
 
 export function getStorageItem<T>(key: string, defaultValue: T): T {
+  if (!isLocalStorageAvailable()) {
+    console.warn('localStorage não está disponível. Retornando valor padrão.');
+    return defaultValue;
+  }
+  
   try {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
