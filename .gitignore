@@ -76,3 +76,5 @@ coverage/
 # Temporary files created for testing
 temp_check.js
 create-sample-data.js
+
+.bevel/do_not_share

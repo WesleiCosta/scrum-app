@@ -1,0 +1,165 @@
+{
+  "fileInfos" : [ {
+    "path" : "src\\App.tsx",
+    "modificationInfo" : {
+      "contentHash" : 1617565602,
+      "lastModified" : 1758888283675
+    },
+    "linesOfCode" : 44
+  }, {
+    "path" : "src\\components\\Layout.tsx",
+    "modificationInfo" : {
+      "contentHash" : -670599025,
+      "lastModified" : 1758888283675
+    },
+    "linesOfCode" : 91
+  }, {
+    "path" : "src\\components\\LoadingSpinner.tsx",
+    "modificationInfo" : {
+      "contentHash" : 2076935093,
+      "lastModified" : 1758888283674
+    },
+    "linesOfCode" : 27
+  }, {
+    "path" : "src\\components\\MetricsConfiguration.tsx",
+    "modificationInfo" : {
+      "contentHash" : 573472375,
+      "lastModified" : 1758902718667
+    },
+    "linesOfCode" : 237
+  }, {
+    "path" : "src\\contexts\\AuthContext.tsx",
+    "modificationInfo" : {
+      "contentHash" : -1679636905,
+      "lastModified" : 1758888283672
+    },
+    "linesOfCode" : 87
+  }, {
+    "path" : "src\\contexts\\ProjectContext.tsx",
+    "modificationInfo" : {
+      "contentHash" : 1372040148,
+      "lastModified" : 1758898354854
+    },
+    "linesOfCode" : 171
+  }, {
+    "path" : "src\\contexts\\SprintContext.tsx",
+    "modificationInfo" : {
+      "contentHash" : -463290412,
+      "lastModified" : 1758906047870
+    },
+    "linesOfCode" : 159
+  }, {
+    "path" : "src\\main.tsx",
+    "modificationInfo" : {
+      "contentHash" : -1706443686,
+      "lastModified" : 1758887649003
+    },
+    "linesOfCode" : 22
+  }, {
+    "path" : "src\\pages\\ConfigurationPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : -1053572058,
+      "lastModified" : 1758888283668
+    },
+    "linesOfCode" : 214
+  }, {
+    "path" : "src\\pages\\DashboardPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : 810501079,
+      "lastModified" : 1758906047870
+    },
+    "linesOfCode" : 714
+  }, {
+    "path" : "src\\pages\\LoginPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : 688236886,
+      "lastModified" : 1758887649003
+    },
+    "linesOfCode" : 187
+  }, {
+    "path" : "src\\pages\\MetricsConfigPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : -917015312,
+      "lastModified" : 1758901389487
+    },
+    "linesOfCode" : 13
+  }, {
+    "path" : "src\\pages\\ProjectsPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : -687144755,
+      "lastModified" : 1758888283676
+    },
+    "linesOfCode" : 149
+  }, {
+    "path" : "src\\pages\\SprintLogPage.tsx",
+    "modificationInfo" : {
+      "contentHash" : 769705672,
+      "lastModified" : 1758907470015
+    },
+    "linesOfCode" : 392
+  }, {
+    "path" : "src\\types\\index.ts",
+    "modificationInfo" : {
+      "contentHash" : 1588402504,
+      "lastModified" : 1758898354838
+    },
+    "linesOfCode" : 115
+  }, {
+    "path" : "src\\types\\metrics.ts",
+    "modificationInfo" : {
+      "contentHash" : 1205920045,
+      "lastModified" : 1758901389484
+    },
+    "linesOfCode" : 326
+  }, {
+    "path" : "src\\utils\\constants.ts",
+    "modificationInfo" : {
+      "contentHash" : 605330746,
+      "lastModified" : 1758897695046
+    },
+    "linesOfCode" : 96
+  }, {
+    "path" : "src\\utils\\markov.ts",
+    "modificationInfo" : {
+      "contentHash" : 1523773498,
+      "lastModified" : 1758899804230
+    },
+    "linesOfCode" : 153
+  }, {
+    "path" : "src\\utils\\quantified-states.ts",
+    "modificationInfo" : {
+      "contentHash" : -535363136,
+      "lastModified" : 1758902718666
+    },
+    "linesOfCode" : 237
+  }, {
+    "path" : "src\\utils\\storage.ts",
+    "modificationInfo" : {
+      "contentHash" : -374806545,
+      "lastModified" : 1758898354858
+    },
+    "linesOfCode" : 158
+  }, {
+    "path" : "src\\utils\\tools-integration.ts",
+    "modificationInfo" : {
+      "contentHash" : -1526913651,
+      "lastModified" : 1758901389497
+    },
+    "linesOfCode" : 295
+  }, {
+    "path" : "tailwind.config.js",
+    "modificationInfo" : {
+      "contentHash" : -467595338,
+      "lastModified" : 1758887649001
+    },
+    "linesOfCode" : 42
+  }, {
+    "path" : "vite.config.ts",
+    "modificationInfo" : {
+      "contentHash" : 1874377560,
+      "lastModified" : 1758887649001
+    },
+    "linesOfCode" : 15
+  } ],
+  "appVersion" : "1.3.0"
+}
