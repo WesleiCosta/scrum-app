@@ -314,7 +314,7 @@ function SprintLogPage() {
                         <span className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-bold mr-3">
                           {sprint.sprintName ? sprint.sprintName.replace('Sprint ', '') : '?'}
                         </span>
-                        {sprint.sprintName || `Sprint ${sprintLogs.findIndex(s => s.id === sprint.id) + 1}`}
+                        {sprint.sprintName || 'Sprint sem nome'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

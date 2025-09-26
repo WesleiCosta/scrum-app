@@ -30,23 +30,7 @@ export function SprintProvider({ children }: SprintProviderProps) {
   const loadProjectData = () => {
     if (!currentProject) return;
 
-    let logs = sprintLogsStorage.getByProject(currentProject.id);
-    
-    // Migrar sprints sem nome automático
-    let needsUpdate = false;
-    logs = logs.map((log, index) => {
-      if (!log.sprintName || log.sprintName === '') {
-        needsUpdate = true;
-        return { ...log, sprintName: `Sprint ${index + 1}` };
-      }
-      return log;
-    });
-    
-    // Se houve migração, salvar os dados atualizados
-    if (needsUpdate) {
-      logs.forEach(log => sprintLogsStorage.update(log.id, { sprintName: log.sprintName }));
-    }
-    
+    const logs = sprintLogsStorage.getByProject(currentProject.id);
     setSprintLogs(logs);
 
     const matrix = transitionMatricesStorage.getByProject(currentProject.id);
@@ -80,7 +64,10 @@ export function SprintProvider({ children }: SprintProviderProps) {
     };
 
     sprintLogsStorage.add(newLog);
-    setSprintLogs(prev => [...prev, newLog]);
+    
+    // Recarregar dados do storage para garantir sincronização
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
     setTimeout(() => refreshMatrix(), 100);
@@ -88,9 +75,10 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
   const updateSprintLog = async (logId: string, updates: Partial<SprintLog>): Promise<void> => {
     sprintLogsStorage.update(logId, updates);
-    setSprintLogs(prev => prev.map(log => 
-      log.id === logId ? { ...log, ...updates, updatedAt: new Date().toISOString() } : log
-    ));
+    
+    // Recarregar dados do storage para garantir sincronização
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
     setTimeout(() => refreshMatrix(), 100);
@@ -98,7 +86,10 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
   const deleteSprintLog = async (logId: string): Promise<void> => {
     sprintLogsStorage.remove(logId);
-    setSprintLogs(prev => prev.filter(log => log.id !== logId));
+    
+    // Recarregar dados do storage para garantir sincronização
+    const updatedLogs = sprintLogsStorage.getByProject(currentProject!.id);
+    setSprintLogs(updatedLogs);
     
     // Recalcula matriz automaticamente
     setTimeout(() => refreshMatrix(), 100);
