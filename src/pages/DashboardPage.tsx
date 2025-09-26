@@ -29,6 +29,149 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  // Análise Inteligente Avançada
+  const analisarSituacaoAtual = useMemo(() => {
+    const historicoCompleto = sprintLogs.map(log => converterParaEstadoUnificado(log.finalState));
+    const totalSprints = historicoCompleto.length;
+    
+    if (totalSprints === 0) {
+      return {
+        situacao: 'Projeto Novo',
+        contexto: 'Projeto sem histórico de sprints ainda.',
+        urgencia: 'baixa' as const,
+        insights: ['Defina critérios de sucesso claros', 'Estabeleça métricas de acompanhamento'],
+        acoes: ['Configure a rubrica de avaliação', 'Planeje as primeiras sprints com cuidado'],
+        taxas: {
+          geral: { saudavel: 0, risco: 0, critico: 0 },
+          recente: null
+        }
+      };
+    }
+    
+    const ultimas3 = historicoCompleto.slice(-3);
+    
+    const taxas = {
+      geral: {
+        saudavel: historicoCompleto.filter(e => e === 'Saudável').length / totalSprints,
+        risco: historicoCompleto.filter(e => e === 'Em Risco').length / totalSprints,
+        critico: historicoCompleto.filter(e => e === 'Crítico').length / totalSprints
+      },
+      recente: ultimas3.length > 0 ? {
+        saudavel: ultimas3.filter(e => e === 'Saudável').length / ultimas3.length,
+        risco: ultimas3.filter(e => e === 'Em Risco').length / ultimas3.length,
+        critico: ultimas3.filter(e => e === 'Crítico').length / ultimas3.length
+      } : null
+    };
+    
+    // Detectar padrões e tendências
+    const estadoAtual = historicoCompleto[historicoCompleto.length - 1];
+    let situacao = '';
+    let contexto = '';
+    let urgencia: 'baixa' | 'media' | 'alta' = 'baixa';
+    let insights: string[] = [];
+    let acoes: string[] = [];
+    
+    // Análise do estado atual
+    if (estadoAtual === 'Crítico') {
+      urgencia = 'alta';
+      if (taxas.recente && taxas.recente.critico >= 0.67) {
+        situacao = 'Crise Persistente';
+        contexto = 'Projeto em estado crítico há várias sprints consecutivas.';
+        insights = [
+          'Problemas estruturais podem estar afetando o projeto',
+          'Necessária intervenção imediata da liderança',
+          'Riscos de não-entrega estão elevados'
+        ];
+        acoes = [
+          'Revisar completamente o escopo e cronograma',
+          'Mobilizar recursos de emergência',
+          'Implementar acompanhamento diário intensivo',
+          'Considerar re-arquitetura da solução'
+        ];
+      } else {
+        situacao = 'Problema Pontual';
+        contexto = 'Estado crítico recente, mas não persistente.';
+        insights = [
+          'Pode ser um problema específico e resolvível',
+          'Importante identificar a causa raiz rapidamente'
+        ];
+        acoes = [
+          'Identificar impedimentos específicos',
+          'Aumentar suporte técnico temporariamente',
+          'Revisar prioridades da sprint atual'
+        ];
+      }
+    } else if (estadoAtual === 'Em Risco') {
+      urgencia = 'media';
+      if (taxas.recente && taxas.recente.saudavel === 0) {
+        situacao = 'Deterioração Gradual';
+        contexto = 'Projeto perdendo performance nas últimas sprints.';
+        insights = [
+          'Tendência negativa precisa ser interrompida',
+          'Fatores externos podem estar impactando a equipe'
+        ];
+        acoes = [
+          'Conduzir retrospectiva focada em problemas',
+          'Revisar capacidade e carga da equipe',
+          'Melhorar comunicação com stakeholders'
+        ];
+      } else {
+        situacao = 'Flutuação Normal';
+        contexto = 'Estado de risco dentro da variabilidade esperada.';
+        insights = [
+          'Manter vigilância preventiva',
+          'Aproveitar para fortalecer processos'
+        ];
+        acoes = [
+          'Monitorar indicadores-chave de perto',
+          'Implementar melhorias incrementais',
+          'Preparar planos de contingência'
+        ];
+      }
+    } else { // Saudável
+      urgencia = 'baixa';
+      if (taxas.geral.saudavel >= 0.8) {
+        situacao = 'Excelência Consistente';
+        contexto = 'Projeto mantém alta performance de forma consistente.';
+        insights = [
+          'Práticas atuais estão funcionando muito bem',
+          'Equipe demonstra maturidade ágil elevada',
+          'Modelo para outros projetos'
+        ];
+        acoes = [
+          'Documentar práticas de sucesso',
+          'Compartilhar conhecimento com outras equipes',
+          'Buscar inovações para manter liderança',
+          'Considerar desafios mais ambiciosos'
+        ];
+      } else {
+        situacao = 'Recuperação Positiva';
+        contexto = 'Projeto em bom momento após períodos instáveis.';
+        insights = [
+          'Importante consolidar as melhorias recentes',
+          'Não baixar a guarda com processos'
+        ];
+        acoes = [
+          'Reforçar práticas que levaram à melhoria',
+          'Manter disciplina nas cerimônias ágeis',
+          'Preparar equipe para próximos desafios'
+        ];
+      }
+    }
+    
+    return { 
+      situacao, 
+      contexto, 
+      urgencia, 
+      insights, 
+      acoes, 
+      taxas: {
+        geral: taxas.geral,
+        recente: taxas.recente
+      }
+    };
+  }, [sprintLogs]);
+
   // Dados computados usando o motor Scrum-Markov
   const dadosComputados = useMemo(() => {
     const historicoEstados: UnifiedState[] = sprintLogs.map(log => 
@@ -195,6 +338,150 @@ const DashboardPage: React.FC = () => {
                     {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Crítico').length / Math.max(historicoEstados.length, 1)) * 100)}%
                   </div>
                   <div className="text-sm text-gray-600">Taxa Crítica</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Análise Inteligente e Sugestões */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">🧠 Análise Inteligente & Plano de Ação</h3>
+              
+              {/* Análise do Estado Atual */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  🔍 Análise Inteligente do Momento Atual
+                  <span className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
+                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-200 text-red-800' :
+                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-200 text-yellow-800' :
+                    'bg-green-200 text-green-800'
+                  }`}>
+                    {analisarSituacaoAtual.urgencia.toUpperCase()}
+                  </span>
+                </h4>
+                <div className="space-y-3 text-gray-700">
+                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
+                    <p><strong>Situação:</strong> {analisarSituacaoAtual.situacao}</p>
+                    <p className="text-sm mt-1 text-gray-600">{analisarSituacaoAtual.contexto}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="font-bold text-green-800">Saudável</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {Math.round(analisarSituacaoAtual.taxas.geral.saudavel * 100)}%
+                      </div>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="font-bold text-yellow-800">Em Risco</div>
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {Math.round(analisarSituacaoAtual.taxas.geral.risco * 100)}%
+                      </div>
+                    </div>
+                    <div className="bg-red-50 p-3 rounded-lg">
+                      <div className="font-bold text-red-800">Crítico</div>
+                      <div className="text-2xl font-bold text-red-600">
+                        {Math.round(analisarSituacaoAtual.taxas.geral.critico * 100)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <h5 className="font-bold text-blue-800 mb-2">💡 Insights da IA:</h5>
+                    <ul className="list-disc pl-5 space-y-1 text-blue-700 text-sm">
+                      {analisarSituacaoAtual.insights.map((insight, index) => (
+                        <li key={index}>{insight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Plano de Ação Inteligente */}
+              <div className={`p-4 border-l-4 rounded-r-lg ${
+                analisarSituacaoAtual.urgencia === 'alta' ? 'border-red-500 bg-red-50' :
+                analisarSituacaoAtual.urgencia === 'media' ? 'border-yellow-500 bg-yellow-50' :
+                'border-green-500 bg-green-50'
+              }`}>
+                <h4 className={`text-lg font-semibold mb-4 flex items-center ${
+                  analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
+                  analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
+                  'text-green-800'
+                }`}>
+                  🎯 Plano de Ação Inteligente
+                  {analisarSituacaoAtual.urgencia === 'alta' && <span className="ml-2 animate-pulse">🚨</span>}
+                </h4>
+                
+                <div className="space-y-4">
+                  {/* Ações Específicas da IA */}
+                  <div className={`p-3 rounded-lg ${
+                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100' :
+                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100' :
+                    'bg-green-100'
+                  }`}>
+                    <h5 className={`font-bold mb-2 ${
+                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
+                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
+                      'text-green-800'
+                    }`}>
+                      {analisarSituacaoAtual.urgencia === 'alta' ? '🚨 AÇÕES CRÍTICAS' :
+                       analisarSituacaoAtual.urgencia === 'media' ? '⚠️ AÇÕES PREVENTIVAS' :
+                       '✅ AÇÕES DE MELHORIA'}
+                    </h5>
+                    <ul className={`list-disc pl-5 space-y-1 ${
+                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-700' :
+                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-700' :
+                      'text-green-700'
+                    }`}>
+                      {analisarSituacaoAtual.acoes.map((acao, index) => (
+                        <li key={index}>{acao}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Previsão Preditiva */}
+                  {previsoes.length > 0 && (
+                    <div className="bg-blue-100 p-3 rounded-lg">
+                      <h5 className="font-bold text-blue-800 mb-2">🔮 Previsão Próxima Sprint</h5>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="text-center">
+                          <div className="text-green-600 font-bold">
+                            {Math.round(previsoes[0].probabilities[0] * 100)}%
+                          </div>
+                          <div className="text-gray-600">Saudável</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-yellow-600 font-bold">
+                            {Math.round(previsoes[0].probabilities[1] * 100)}%
+                          </div>
+                          <div className="text-gray-600">Em Risco</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-red-600 font-bold">
+                            {Math.round(previsoes[0].probabilities[2] * 100)}%
+                          </div>
+                          <div className="text-gray-600">Crítico</div>
+                        </div>
+                      </div>
+                      {previsoes[0].probabilities[2] > 0.4 && (
+                        <p className="text-red-700 text-sm mt-2 font-medium">
+                          ⚠️ Alto risco de estado crítico - Reforce medidas preventivas
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Métricas de Acompanhamento */}
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <h5 className="font-bold text-gray-800 mb-2">📊 Indicadores para Monitorar</h5>
+                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-700">
+                      <div>• Velocity da equipe</div>
+                      <div>• Burn-down da sprint</div>
+                      <div>• Número de impedimentos</div>
+                      <div>• Taxa de retrabalho</div>
+                      <div>• Satisfação da equipe</div>
+                      <div>• Qualidade das entregas</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
