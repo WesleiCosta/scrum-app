@@ -153,7 +153,8 @@ function SprintLogPage() {
       'CRÍTICO': 4
     };
     const stateId = stateIdMap[state];
-    return currentProject.stateDefinitions.find(def => def.id === stateId)?.name || state;
+    const stateDefinition = currentProject?.stateDefinitions?.find(def => def.id === stateId);
+    return stateDefinition?.name || state;
   };
 
   return (
@@ -251,11 +252,22 @@ function SprintLogPage() {
                 value={newSprint.finalState}
                 onChange={(e) => setNewSprint({...newSprint, finalState: e.target.value as ProjectState})}
               >
-                {currentProject.stateDefinitions.map(stateDef => (
-                  <option key={stateDef.id} value={stateDef.id}>
-                    {stateDef.id} - {stateDef.name}
-                  </option>
-                ))}
+                {currentProject.stateDefinitions.map(stateDef => {
+                  // Mapear StateDefinition.id (number) para ProjectState (string)
+                  const stateMap: { [key: number]: ProjectState } = {
+                    0: 'EXCELENTE',
+                    1: 'BOM', 
+                    2: 'ESTÁVEL',
+                    3: 'RISCO',
+                    4: 'CRÍTICO'
+                  };
+                  const projectState = stateMap[stateDef.id];
+                  return (
+                    <option key={stateDef.id} value={projectState}>
+                      {stateDef.name}
+                    </option>
+                  );
+                })}
               </select>
               <p className="text-xs text-gray-500 mt-1">
                 📊 Selecione o estado que melhor representa o resultado deste sprint
