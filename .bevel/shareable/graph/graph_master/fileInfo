@@ -108,7 +108,7 @@
     "path" : "src\\tests\\scientific-algorithm-tests.ts",
     "modificationInfo" : {
       "contentHash" : -1136667603,
-      "lastModified" : 1758928790198
+      "lastModified" : 1758928940452
     },
     "linesOfCode" : 630
   }, {
@@ -135,10 +135,10 @@
   }, {
     "path" : "src\\utils\\api-integration.ts",
     "modificationInfo" : {
-      "contentHash" : -626530860,
-      "lastModified" : 1758925736469
+      "contentHash" : 1376656089,
+      "lastModified" : 1758928940452
     },
-    "linesOfCode" : 352
+    "linesOfCode" : 351
   }, {
     "path" : "src\\utils\\constants.ts",
     "modificationInfo" : {
@@ -149,8 +149,8 @@
   }, {
     "path" : "src\\utils\\markov.ts",
     "modificationInfo" : {
-      "contentHash" : -311113903,
-      "lastModified" : 1758925736474
+      "contentHash" : 1873671237,
+      "lastModified" : 1758928940415
     },
     "linesOfCode" : 265
   }, {
@@ -170,15 +170,15 @@
   }, {
     "path" : "src\\utils\\rubric-service.ts",
     "modificationInfo" : {
-      "contentHash" : -697923123,
-      "lastModified" : 1758928764974
+      "contentHash" : -2130516450,
+      "lastModified" : 1758929053916
     },
-    "linesOfCode" : 216
+    "linesOfCode" : 240
   }, {
     "path" : "src\\utils\\scrum-markov-engine.ts",
     "modificationInfo" : {
       "contentHash" : -518794794,
-      "lastModified" : 1758928780229
+      "lastModified" : 1758928940452
     },
     "linesOfCode" : 322
   }, {
@@ -210,12 +210,19 @@
     },
     "linesOfCode" : 42
   }, {
-    "path" : "test-corrections.js",
+    "path" : "test-fixed-ranges.js",
     "modificationInfo" : {
-      "contentHash" : 1336349444,
-      "lastModified" : 1758928820525
+      "contentHash" : 2058000987,
+      "lastModified" : 1758929084317
     },
-    "linesOfCode" : 80
+    "linesOfCode" : 136
+  }, {
+    "path" : "test-zero-values.js",
+    "modificationInfo" : {
+      "contentHash" : -1485697663,
+      "lastModified" : 1758929026194
+    },
+    "linesOfCode" : 133
   }, {
     "path" : "vite.config.ts",
     "modificationInfo" : {
