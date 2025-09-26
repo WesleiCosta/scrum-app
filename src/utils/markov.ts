@@ -1,15 +1,32 @@
 import { ProjectState, SprintLog, StateProjection, STATE_INDEX_MAP } from '../types';
 
+// Tipo para informações detalhadas da matriz
+export interface MatrixInfo {
+  matrix: number[][];
+  transitionCounts: number[][];
+  stateCounts: number[];
+  totalTransitions: number;
+}
+
 // Função para calcular a matriz de transição 5x5
 export function calculateTransitionMatrix(sprintLogs: SprintLog[]): number[][] {
-  // Inicializa matriz 5x5 com zeros
+  const matrixInfo = calculateTransitionMatrixDetailed(sprintLogs);
+  return matrixInfo.matrix;
+}
+
+// Função para calcular a matriz de transição com informações detalhadas (RF-04)
+export function calculateTransitionMatrixDetailed(sprintLogs: SprintLog[]): MatrixInfo {
+  // Inicializa estruturas de dados
   const matrix: number[][] = Array(5).fill(null).map(() => Array(5).fill(0));
+  const transitionCounts: number[][] = Array(5).fill(null).map(() => Array(5).fill(0));
+  const stateCounts: number[] = Array(5).fill(0);
+  let totalTransitions = 0;
   
   if (sprintLogs.length < 2) {
-    return matrix;
+    return { matrix, transitionCounts, stateCounts, totalTransitions };
   }
 
-  // Ordena logs por data
+  // Ordena logs por data para garantir sequência correta
   const sortedLogs = [...sprintLogs].sort((a, b) => 
     new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
   );
@@ -24,10 +41,7 @@ export function calculateTransitionMatrix(sprintLogs: SprintLog[]): number[][] {
     return index;
   };
 
-  // Conta transições
-  const transitionCounts: number[][] = Array(5).fill(null).map(() => Array(5).fill(0));
-  const stateCounts: number[] = Array(5).fill(0);
-
+  // RF-04: Conta todas as transições observadas
   for (let i = 0; i < sortedLogs.length - 1; i++) {
     const fromState = stateToIndex(sortedLogs[i].finalState);
     const toState = stateToIndex(sortedLogs[i + 1].finalState);
@@ -36,24 +50,26 @@ export function calculateTransitionMatrix(sprintLogs: SprintLog[]): number[][] {
     if (fromState >= 0 && fromState < 5 && toState >= 0 && toState < 5) {
       transitionCounts[fromState][toState]++;
       stateCounts[fromState]++;
+      totalTransitions++;
     } else {
       console.warn('Estado inválido encontrado nos logs:', sortedLogs[i].finalState, sortedLogs[i + 1].finalState);
     }
   }
 
-  // Calcula probabilidades
+  // RF-04: Calcula probabilidades usando a fórmula Pij = (transições i→j) / (total de transições de i)
   for (let i = 0; i < 5; i++) {
     if (stateCounts[i] > 0) {
       for (let j = 0; j < 5; j++) {
         matrix[i][j] = transitionCounts[i][j] / stateCounts[i];
       }
     }
+    // RF-04: Se um estado nunca ocorreu, probabilidade é 0 (divisão por zero tratada)
   }
 
-  return matrix;
+  return { matrix, transitionCounts, stateCounts, totalTransitions };
 }
 
-// Função para calcular projeções futuras
+// RF-05: Função para calcular projeções de 3 sprints usando fórmula Sn+1 = Sn × P
 export function calculateProjections(
   currentState: ProjectState, 
   transitionMatrix: number[][], 
@@ -181,4 +197,69 @@ export function isValidTransitionMatrix(matrix: number[][]): boolean {
     const sum = row.reduce((acc, val) => acc + val, 0);
     return Math.abs(sum - 1) < 0.0001 || sum === 0; // Tolerância para erros de ponto flutuante
   });
+}
+
+// RF-05: Função para obter nomes dos estados na ordem da matriz
+export function getStateNames(): string[] {
+  return ['EXCELENTE', 'BOM', 'ESTÁVEL', 'RISCO', 'CRÍTICO'];
+}
+
+// RF-05: Função para identificar estados de maior risco (P4 e P5)
+export function getHighRiskStates(): string[] {
+  return ['RISCO', 'CRÍTICO'];
+}
+
+// RF-05: Função para calcular as projeções completas para 3 sprints
+export interface ProjectionData {
+  current: { [state: string]: number };
+  sprint1: { [state: string]: number };
+  sprint2: { [state: string]: number };
+  sprint3: { [state: string]: number };
+}
+
+export function calculateProjectionData(currentState: ProjectState, matrix: number[][]): ProjectionData {
+  const states = getStateNames();
+  
+  // Estado atual (one-hot)
+  const current: { [state: string]: number } = {};
+  states.forEach(state => {
+    current[state] = state === currentState ? 1 : 0;
+  });
+  
+  // Calcular projeções usando fórmula Sn+1 = Sn × P
+  let currentVector = states.map(state => current[state]);
+  
+  // Sprint +1
+  const sprint1Vector = multiplyVectorMatrix(currentVector, matrix);
+  const sprint1: { [state: string]: number } = {};
+  states.forEach((state, i) => {
+    sprint1[state] = sprint1Vector[i];
+  });
+  
+  // Sprint +2
+  const sprint2Vector = multiplyVectorMatrix(sprint1Vector, matrix);
+  const sprint2: { [state: string]: number } = {};
+  states.forEach((state, i) => {
+    sprint2[state] = sprint2Vector[i];
+  });
+  
+  // Sprint +3
+  const sprint3Vector = multiplyVectorMatrix(sprint2Vector, matrix);
+  const sprint3: { [state: string]: number } = {};
+  states.forEach((state, i) => {
+    sprint3[state] = sprint3Vector[i];
+  });
+  
+  return { current, sprint1, sprint2, sprint3 };
+}
+
+// Função auxiliar para multiplicar vetor por matriz
+function multiplyVectorMatrix(vector: number[], matrix: number[][]): number[] {
+  const result = Array(5).fill(0);
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      result[j] += vector[i] * matrix[i][j];
+    }
+  }
+  return result;
 }

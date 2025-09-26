@@ -45,7 +45,7 @@
     "path" : "src\\contexts\\ProjectContext.tsx",
     "modificationInfo" : {
       "contentHash" : 1752500287,
-      "lastModified" : 1758916905873
+      "lastModified" : 1758917033256
     },
     "linesOfCode" : 172
   }, {
@@ -55,20 +55,6 @@
       "lastModified" : 1758915487049
     },
     "linesOfCode" : 242
-  }, {
-    "path" : "src\\contexts\\SprintContext_fixed.tsx",
-    "modificationInfo" : {
-      "contentHash" : 479260079,
-      "lastModified" : 1758912606146
-    },
-    "linesOfCode" : 203
-  }, {
-    "path" : "src\\contexts\\SprintContext_v2.tsx",
-    "modificationInfo" : {
-      "contentHash" : 913300225,
-      "lastModified" : 1758913549639
-    },
-    "linesOfCode" : 234
   }, {
     "path" : "src\\main.tsx",
     "modificationInfo" : {
@@ -86,17 +72,10 @@
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
-      "contentHash" : 566843772,
-      "lastModified" : 1758915487048
+      "contentHash" : -1765969911,
+      "lastModified" : 1758919881895
     },
-    "linesOfCode" : 243
-  }, {
-    "path" : "src\\pages\\DashboardPage_clean.tsx",
-    "modificationInfo" : {
-      "contentHash" : 443749841,
-      "lastModified" : 1758913604351
-    },
-    "linesOfCode" : 242
+    "linesOfCode" : 309
   }, {
     "path" : "src\\pages\\LoginPage.tsx",
     "modificationInfo" : {
@@ -115,14 +94,14 @@
     "path" : "src\\pages\\ProjectsPage.tsx",
     "modificationInfo" : {
       "contentHash" : -1539645977,
-      "lastModified" : 1758916962692
+      "lastModified" : 1758917033256
     },
     "linesOfCode" : 264
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
       "contentHash" : -2072499897,
-      "lastModified" : 1758918168456
+      "lastModified" : 1758918263167
     },
     "linesOfCode" : 496
   }, {
@@ -149,10 +128,10 @@
   }, {
     "path" : "src\\utils\\markov.ts",
     "modificationInfo" : {
-      "contentHash" : -1386420241,
-      "lastModified" : 1758912699696
+      "contentHash" : -311113903,
+      "lastModified" : 1758919678480
     },
-    "linesOfCode" : 184
+    "linesOfCode" : 265
   }, {
     "path" : "src\\utils\\quantified-states.ts",
     "modificationInfo" : {
@@ -164,7 +143,7 @@
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
       "contentHash" : -1494678035,
-      "lastModified" : 1758916905881
+      "lastModified" : 1758917033256
     },
     "linesOfCode" : 214
   }, {
