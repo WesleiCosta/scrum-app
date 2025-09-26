@@ -415,13 +415,46 @@ function SprintLogPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        onClick={() => deleteSprintLog(sprint.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                        title="Remover sprint"
-                      >
-                        🗑️
-                      </button>
+                      {(() => {
+                        // Verificar se há sprints disponíveis
+                        if (sprintLogs.length === 0) return null;
+                        
+                        // Encontrar o último sprint inserido (mais recente por createdAt)
+                        const lastInsertedSprint = sprintLogs.reduce((latest, current) => 
+                          new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest
+                        );
+                        
+                        // Verificar se este é o último sprint inserido
+                        const isLastInserted = sprint.id === lastInsertedSprint.id;
+                        
+                        if (isLastInserted) {
+                          return (
+                            <div className="flex flex-col items-center space-y-1">
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Tem certeza que deseja excluir o ${sprint.sprintName}?\n\nEsta ação não pode ser desfeita e pode afetar os cálculos de Markov.`)) {
+                                    deleteSprintLog(sprint.id);
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors border border-red-200 hover:border-red-300"
+                                title="Excluir último sprint inserido"
+                              >
+                                🗑️
+                              </button>
+                              <span className="text-xs text-green-600 font-medium">Último</span>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div className="flex flex-col items-center space-y-1">
+                              <span className="text-gray-400 p-2" title="Apenas o último sprint inserido pode ser excluído">
+                                🔒
+                              </span>
+                              <span className="text-xs text-gray-400">Protegido</span>
+                            </div>
+                          );
+                        }
+                      })()}
                     </td>
                   </tr>
                 ))}
