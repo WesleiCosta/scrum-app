@@ -58,7 +58,7 @@ function SprintLogPage() {
     }
     
     // Validar estado final
-    const validStates = ['CRÍTICO', 'RISCO', 'ESTÁVEL', 'BOM', 'EXCELENTE'];
+    const validStates = currentProject.stateDefinitions.map(def => def.id);
     if (!newSprint.finalState || !validStates.includes(newSprint.finalState)) {
       console.error('Erro: Estado final é obrigatório e deve ser válido');
       return;
@@ -66,39 +66,41 @@ function SprintLogPage() {
 
     setLoading(true);
     try {
-      // Usar o estado atual dos sprints ao invés de buscar do storage
+      // Buscar dados atualizados do storage para garantir consistência
       const currentSprints = sprintLogs;
       const nextSprintNumber = currentSprints.length + 1;
       const sprintName = `Sprint ${nextSprintNumber}`;
       
-      // Calcular data de término
+      // Calcular data de término com validações mais robustas
       let endDate: string;
+      const today = new Date();
+      
       if (currentSprints.length === 0) {
-        // Primeiro sprint: data atual + duração informada (pode ser 0)
-        const today = new Date();
-        const safeDuration = isNaN(newSprint.sprintDurationDays) ? 0 : Math.max(0, newSprint.sprintDurationDays);
+        // Primeiro sprint: usar duração informada
+        const safeDuration = Math.max(0, newSprint.sprintDurationDays || 14);
         const durationMs = safeDuration * 24 * 60 * 60 * 1000;
         const endDateObj = new Date(today.getTime() + durationMs);
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
-        // Sprints subsequentes: última data de término + 15 dias fixos
-        const sortedSprints = [...currentSprints].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
-        if (sortedSprints.length === 0) {
-          // Fallback se não há sprints
-          const today = new Date();
-          endDate = new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-        } else {
-          const lastSprint = sortedSprints[0];
-          const lastEndDate = new Date(lastSprint.endDate);
-          // Validar se a data é válida
-          if (isNaN(lastEndDate.getTime())) {
-            const today = new Date();
-            endDate = new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-          } else {
-            const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
-            endDate = endDateObj.toISOString().split('T')[0];
-          }
+        // Sprints subsequentes: usar duração informada a partir do último sprint
+        const sortedSprints = [...currentSprints].sort((a, b) => 
+          new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        );
+        
+        const lastSprint = sortedSprints[0];
+        let baseDate = new Date(lastSprint.endDate);
+        
+        // Validar se a data do último sprint é válida
+        if (isNaN(baseDate.getTime())) {
+          console.warn('Data inválida no último sprint, usando data atual');
+          baseDate = today;
         }
+        
+        // Usar duração informada pelo usuário
+        const safeDuration = Math.max(1, newSprint.sprintDurationDays || 14);
+        const durationMs = safeDuration * 24 * 60 * 60 * 1000;
+        const endDateObj = new Date(baseDate.getTime() + durationMs);
+        endDate = endDateObj.toISOString().split('T')[0];
       }
       
       await addSprintLog({
@@ -170,27 +172,28 @@ function SprintLogPage() {
                   <span className="text-blue-700 font-medium">Data de Término:</span>
                   <p className="text-blue-800">
                     {(() => {
+                      const today = new Date();
+                      const duration = Math.max(0, newSprint.sprintDurationDays || 14);
+                      
                       if (sprintLogs.length === 0) {
-                        const today = new Date();
-                        const endDate = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
+                        const endDate = new Date(today.getTime() + (duration * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       } else {
-                        const sortedSprints = [...sprintLogs].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
-                        if (sortedSprints.length === 0) {
-                          const today = new Date();
-                          return new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR');
-                        }
+                        const sortedSprints = [...sprintLogs].sort((a, b) => 
+                          new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+                        );
                         const lastSprint = sortedSprints[0];
-                        const lastEndDate = new Date(lastSprint.endDate);
-                        if (isNaN(lastEndDate.getTime())) {
-                          const today = new Date();
-                          return new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR');
+                        let baseDate = new Date(lastSprint.endDate);
+                        
+                        if (isNaN(baseDate.getTime())) {
+                          baseDate = today;
                         }
-                        const endDate = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
+                        
+                        const endDate = new Date(baseDate.getTime() + (duration * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       }
                     })()} 
-                    ({sprintLogs.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint'})
+                    ({newSprint.sprintDurationDays || 14} dias a partir da {sprintLogs.length === 0 ? 'data atual' : 'última sprint'})
                   </p>
                 </div>
               </div>

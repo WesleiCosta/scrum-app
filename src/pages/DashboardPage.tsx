@@ -11,14 +11,15 @@ const DashboardPage: React.FC = () => {
   const getMostLikelyStateFromProbs = (probabilities: any) => {
     if (!probabilities || typeof probabilities !== 'object') return 'ESTÁVEL';
     
-    const validStates = ['CRÍTICO', 'RISCO', 'ESTÁVEL', 'BOM', 'EXCELENTE'];
+    // Usar estados válidos do projeto atual
+    const validStates = currentProject?.stateDefinitions.map(def => def.id) || ['CRÍTICO', 'RISCO', 'ESTÁVEL', 'BOM', 'EXCELENTE'];
     let maxProb = -1;
     let mostLikely = 'ESTÁVEL';
     
     Object.entries(probabilities).forEach(([state, prob]) => {
-      if (validStates.includes(state) && typeof prob === 'number' && !isNaN(prob) && prob >= 0 && prob <= 1 && prob > maxProb) {
+      if (validStates.includes(state as any) && typeof prob === 'number' && !isNaN(prob) && prob >= 0 && prob <= 1 && prob > maxProb) {
         maxProb = prob;
-        mostLikely = state;
+        mostLikely = state as any;
       }
     });
     

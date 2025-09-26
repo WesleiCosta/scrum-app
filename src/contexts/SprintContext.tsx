@@ -42,31 +42,28 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
       // Recalcula matriz se necessário
       if (!matrix || logs.length > 0) {
-        // Usar setTimeout para garantir que o estado seja atualizado antes do cálculo
-        setTimeout(() => {
-          const updatedMatrix = calculateTransitionMatrix(logs);
-          const newTransitionMatrix: TransitionMatrix = {
-            projectId: currentProject.id,
-            matrix: updatedMatrix,
-            lastUpdated: new Date().toISOString()
-          };
-          
-          transitionMatricesStorage.upsert(newTransitionMatrix);
-          setTransitionMatrix(newTransitionMatrix);
-          
-          // Calcular projeções após atualizar matriz
-          if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION) {
-            const currentState = logs[logs.length - 1].finalState;
-            const newProjections = calculateProjections(
-              currentState, 
-              updatedMatrix, 
-              APP_CONFIG.PROJECTION_SPRINTS
-            );
-            setProjections(newProjections);
-          } else {
-            setProjections([]);
-          }
-        }, 0);
+        const updatedMatrix = calculateTransitionMatrix(logs);
+        const newTransitionMatrix: TransitionMatrix = {
+          projectId: currentProject.id,
+          matrix: updatedMatrix,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        transitionMatricesStorage.upsert(newTransitionMatrix);
+        setTransitionMatrix(newTransitionMatrix);
+        
+        // Calcular projeções após atualizar matriz
+        if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION) {
+          const currentState = logs[logs.length - 1].finalState;
+          const newProjections = calculateProjections(
+            currentState, 
+            updatedMatrix, 
+            APP_CONFIG.PROJECTION_SPRINTS
+          );
+          setProjections(newProjections);
+        } else {
+          setProjections([]);
+        }
       } else {
         setProjections([]);
       }
@@ -104,8 +101,8 @@ export function SprintProvider({ children }: SprintProviderProps) {
       const updatedLogs = [...sprintLogs, newLog];
       setSprintLogs(updatedLogs);
       
-      // Agendar recalculo da matriz após o estado ser atualizado
-      setTimeout(() => refreshMatrix(), 0);
+      // Recalcular matriz imediatamente após atualização
+      refreshMatrix();
     } catch (error) {
       console.error('Erro ao adicionar sprint log:', error);
     }
@@ -126,8 +123,8 @@ export function SprintProvider({ children }: SprintProviderProps) {
       );
       setSprintLogs(updatedLogs);
       
-      // Agendar recalculo da matriz após o estado ser atualizado
-      setTimeout(() => refreshMatrix(), 0);
+      // Recalcular matriz imediatamente após atualização
+      refreshMatrix();
     } catch (error) {
       console.error('Erro ao atualizar sprint log:', error);
     }
@@ -146,8 +143,8 @@ export function SprintProvider({ children }: SprintProviderProps) {
       const updatedLogs = sprintLogs.filter(log => log.id !== logId);
       setSprintLogs(updatedLogs);
       
-      // Agendar recalculo da matriz após o estado ser atualizado
-      setTimeout(() => refreshMatrix(), 0);
+      // Recalcular matriz imediatamente após atualização
+      refreshMatrix();
     } catch (error) {
       console.error('Erro ao deletar sprint log:', error);
     }
@@ -159,6 +156,14 @@ export function SprintProvider({ children }: SprintProviderProps) {
     try {
       // Buscar logs atualizados do storage para garantir dados mais recentes
       const logs = sprintLogsStorage.getByProject(currentProject.id);
+      
+      if (logs.length < 1) {
+        // Se não há logs suficientes, limpar matriz e projeções
+        setTransitionMatrix(null);
+        setProjections([]);
+        return;
+      }
+      
       const matrix = calculateTransitionMatrix(logs);
       
       const newTransitionMatrix: TransitionMatrix = {
@@ -184,6 +189,9 @@ export function SprintProvider({ children }: SprintProviderProps) {
       }
     } catch (error) {
       console.error('Erro ao atualizar matriz de transição:', error);
+      // Em caso de erro, limpar estados para evitar dados inconsistentes
+      setTransitionMatrix(null);
+      setProjections([]);
     }
   };
 
