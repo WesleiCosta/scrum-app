@@ -30,7 +30,23 @@ export function SprintProvider({ children }: SprintProviderProps) {
   const loadProjectData = () => {
     if (!currentProject) return;
 
-    const logs = sprintLogsStorage.getByProject(currentProject.id);
+    let logs = sprintLogsStorage.getByProject(currentProject.id);
+    
+    // Migrar sprints sem nome automático
+    let needsUpdate = false;
+    logs = logs.map((log, index) => {
+      if (!log.sprintName || log.sprintName === '') {
+        needsUpdate = true;
+        return { ...log, sprintName: `Sprint ${index + 1}` };
+      }
+      return log;
+    });
+    
+    // Se houve migração, salvar os dados atualizados
+    if (needsUpdate) {
+      logs.forEach(log => sprintLogsStorage.update(log.id, { sprintName: log.sprintName }));
+    }
+    
     setSprintLogs(logs);
 
     const matrix = transitionMatricesStorage.getByProject(currentProject.id);

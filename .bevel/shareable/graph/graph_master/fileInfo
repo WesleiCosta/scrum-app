@@ -44,10 +44,10 @@
   }, {
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
-      "contentHash" : -463290412,
-      "lastModified" : 1758906047870
+      "contentHash" : -345519611,
+      "lastModified" : 1758908313696
     },
-    "linesOfCode" : 159
+    "linesOfCode" : 175
   }, {
     "path" : "src\\main.tsx",
     "modificationInfo" : {
@@ -93,8 +93,8 @@
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -1599876631,
-      "lastModified" : 1758907985794
+      "contentHash" : -661422717,
+      "lastModified" : 1758908305782
     },
     "linesOfCode" : 396
   }, {
