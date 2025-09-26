@@ -39,7 +39,6 @@ function SprintLogPage() {
     }
 
     // Validação de duração mais robusta
-    const isFirstSprint = sprintLogs.length === 0;
     const duration = newSprint.sprintDurationDays;
     
     if (duration === null || duration === undefined || isNaN(duration)) {
@@ -52,10 +51,8 @@ function SprintLogPage() {
       return;
     }
     
-    if (!isFirstSprint && duration <= 0) {
-      console.error('Erro: Sprints subsequentes devem ter duração positiva');
-      return;
-    }
+    // Permitir duração 0 para finalizar sprint no dia atual
+    // Apenas impedir duração negativa
     
     // Validar estado final
     const validStates = currentProject.stateDefinitions.map(def => def.id);
@@ -96,11 +93,16 @@ function SprintLogPage() {
           baseDate = today;
         }
         
-        // Usar duração informada pelo usuário
-        const safeDuration = Math.max(1, newSprint.sprintDurationDays || 14);
-        const durationMs = safeDuration * 24 * 60 * 60 * 1000;
-        const endDateObj = new Date(baseDate.getTime() + durationMs);
-        endDate = endDateObj.toISOString().split('T')[0];
+        // Se a duração é 0, usar a data de hoje como data final
+        if (newSprint.sprintDurationDays === 0) {
+          endDate = today.toISOString().split('T')[0];
+        } else {
+          // Usar duração informada pelo usuário (pode ser >= 1)
+          const safeDuration = Math.max(1, newSprint.sprintDurationDays || 14);
+          const durationMs = safeDuration * 24 * 60 * 60 * 1000;
+          const endDateObj = new Date(baseDate.getTime() + durationMs);
+          endDate = endDateObj.toISOString().split('T')[0];
+        }
       }
       
       await addSprintLog({
