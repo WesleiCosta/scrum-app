@@ -222,7 +222,7 @@ function SprintLogPage() {
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                💡 Padrão: 14 dias (2 semanas). Ajuste conforme necessário.
+                💡 Padrão: 14 dias (2 semanas). Use 0 para finalizar no dia atual.
               </p>
             </div>
             <div>
