@@ -73,11 +73,15 @@ function SprintLogPage() {
       const today = new Date();
       
       if (currentSprints.length === 0) {
-        // Primeiro sprint: usar duração informada
-        const safeDuration = Math.max(0, newSprint.sprintDurationDays || 14);
-        const durationMs = safeDuration * 24 * 60 * 60 * 1000;
-        const endDateObj = new Date(today.getTime() + durationMs);
-        endDate = endDateObj.toISOString().split('T')[0];
+        // Primeiro sprint: tratar duração 0 como caso especial
+        if (newSprint.sprintDurationDays === 0) {
+          endDate = today.toISOString().split('T')[0];
+        } else {
+          const safeDuration = Math.max(1, newSprint.sprintDurationDays || 14);
+          const durationMs = safeDuration * 24 * 60 * 60 * 1000;
+          const endDateObj = new Date(today.getTime() + durationMs);
+          endDate = endDateObj.toISOString().split('T')[0];
+        }
       } else {
         // Sprints subsequentes: usar duração informada a partir do último sprint
         const sortedSprints = [...currentSprints].sort((a, b) => 
@@ -214,7 +218,11 @@ function SprintLogPage() {
                   min="0"
                   max="60"
                   value={newSprint.sprintDurationDays}
-                  onChange={(e) => setNewSprint({...newSprint, sprintDurationDays: parseInt(e.target.value) || 0})}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === '' ? 0 : parseInt(value);
+                    setNewSprint({...newSprint, sprintDurationDays: isNaN(numValue) ? 0 : numValue});
+                  }}
                   required
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

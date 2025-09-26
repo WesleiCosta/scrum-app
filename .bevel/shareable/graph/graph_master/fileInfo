@@ -121,10 +121,10 @@
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
-      "contentHash" : 326370786,
-      "lastModified" : 1758917263059
+      "contentHash" : 1726170689,
+      "lastModified" : 1758917779576
     },
-    "linesOfCode" : 488
+    "linesOfCode" : 496
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
