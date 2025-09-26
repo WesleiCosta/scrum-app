@@ -39,7 +39,7 @@ function SprintLogPage() {
 
     setLoading(true);
     try {
-      // Buscar sprints mais recentes do storage para garantir numeração correta
+      // Buscar sprints mais recentes do storage para garantir numeração sequencial correta
       const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
       const nextSprintNumber = currentSprints.length + 1;
       const sprintName = `Sprint ${nextSprintNumber}`;
