@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useProject } from '../contexts/ProjectContext';
 import { useSprint } from '../contexts/SprintContext';
 import { ProjectState } from '../types';
-import { formatDate, sprintLogsStorage } from '../utils/storage';
+import { formatDate } from '../utils/storage';
 
 function SprintLogPage() {
   const { currentProject } = useProject();
@@ -52,8 +52,8 @@ function SprintLogPage() {
 
     setLoading(true);
     try {
-      // Buscar sprints mais recentes do storage para garantir numeração sequencial correta
-      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
+      // Usar o estado atual dos sprints ao invés de buscar do storage
+      const currentSprints = sprintLogs;
       const nextSprintNumber = currentSprints.length + 1;
       const sprintName = `Sprint ${nextSprintNumber}`;
       
@@ -66,7 +66,7 @@ function SprintLogPage() {
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
         // Sprints subsequentes: última data de término + 15 dias fixos
-        const sortedSprints = currentSprints.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+        const sortedSprints = [...currentSprints].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
         const lastSprint = sortedSprints[0];
         const lastEndDate = new Date(lastSprint.endDate);
         const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
@@ -134,32 +134,25 @@ function SprintLogPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-blue-700 font-medium">Nome do Sprint:</span>
-                  <p className="text-blue-800">Sprint {(() => {
-                    const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
-                    return currentSprints.length + 1;
-                  })()}</p>
+                  <p className="text-blue-800">Sprint {sprintLogs.length + 1}</p>
                 </div>
                 <div>
                   <span className="text-blue-700 font-medium">Data de Término:</span>
                   <p className="text-blue-800">
                     {(() => {
-                      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
-                      if (currentSprints.length === 0) {
+                      if (sprintLogs.length === 0) {
                         const today = new Date();
                         const endDate = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       } else {
-                        const sortedSprints = currentSprints.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+                        const sortedSprints = [...sprintLogs].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
                         const lastSprint = sortedSprints[0];
                         const lastEndDate = new Date(lastSprint.endDate);
                         const endDate = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       }
                     })()} 
-                    ({(() => {
-                      const currentSprints = sprintLogsStorage.getByProject(currentProject.id);
-                      return currentSprints.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint';
-                    })()})
+                    ({sprintLogs.length === 0 ? `${newSprint.sprintDurationDays} dias após hoje` : '15 dias após último sprint'})
                   </p>
                 </div>
               </div>

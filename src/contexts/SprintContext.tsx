@@ -70,12 +70,12 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
     sprintLogsStorage.add(newLog);
     
-    // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
+    // Atualizar estado local com o novo log
+    const updatedLogs = [...sprintLogs, newLog];
     setSprintLogs(updatedLogs);
     
-    // Recalcula matriz automaticamente
-    refreshMatrix();
+    // Agendar recalculo da matriz após o estado ser atualizado
+    setTimeout(() => refreshMatrix(), 0);
   };
 
   const updateSprintLog = async (logId: string, updates: Partial<SprintLog>): Promise<void> => {
@@ -86,12 +86,14 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
     sprintLogsStorage.update(logId, updates);
     
-    // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
+    // Atualizar estado local
+    const updatedLogs = sprintLogs.map(log => 
+      log.id === logId ? { ...log, ...updates, updatedAt: new Date().toISOString() } : log
+    );
     setSprintLogs(updatedLogs);
     
-    // Recalcula matriz automaticamente
-    refreshMatrix();
+    // Agendar recalculo da matriz após o estado ser atualizado
+    setTimeout(() => refreshMatrix(), 0);
   };
 
   const deleteSprintLog = async (logId: string): Promise<void> => {
@@ -102,18 +104,19 @@ export function SprintProvider({ children }: SprintProviderProps) {
 
     sprintLogsStorage.remove(logId);
     
-    // Recarregar dados do storage para garantir sincronização
-    const updatedLogs = sprintLogsStorage.getByProject(currentProject.id);
+    // Atualizar estado local
+    const updatedLogs = sprintLogs.filter(log => log.id !== logId);
     setSprintLogs(updatedLogs);
     
-    // Recalcula matriz automaticamente
-    refreshMatrix();
+    // Agendar recalculo da matriz após o estado ser atualizado
+    setTimeout(() => refreshMatrix(), 0);
   };
 
   const refreshMatrix = () => {
     if (!currentProject) return;
 
-    const logs = sprintLogsStorage.getByProject(currentProject.id);
+    // Usar os logs do estado atual ao invés de buscar do storage novamente
+    const logs = sprintLogs;
     const matrix = calculateTransitionMatrix(logs);
     
     const newTransitionMatrix: TransitionMatrix = {

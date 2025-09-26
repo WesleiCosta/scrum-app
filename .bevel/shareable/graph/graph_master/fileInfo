@@ -1,5 +1,12 @@
 {
   "fileInfos" : [ {
+    "path" : "clear-browser-data.js",
+    "modificationInfo" : {
+      "contentHash" : -1468427019,
+      "lastModified" : 1758911562288
+    },
+    "linesOfCode" : 40
+  }, {
     "path" : "src\\App.tsx",
     "modificationInfo" : {
       "contentHash" : 1617565602,
@@ -44,10 +51,10 @@
   }, {
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
-      "contentHash" : 688955058,
-      "lastModified" : 1758909466630
+      "contentHash" : 2067836670,
+      "lastModified" : 1758911802756
     },
-    "linesOfCode" : 181
+    "linesOfCode" : 184
   }, {
     "path" : "src\\main.tsx",
     "modificationInfo" : {
@@ -93,10 +100,10 @@
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -2125617656,
-      "lastModified" : 1758909371308
+      "contentHash" : 215588858,
+      "lastModified" : 1758911848665
     },
-    "linesOfCode" : 419
+    "linesOfCode" : 412
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
@@ -122,7 +129,7 @@
     "path" : "src\\utils\\markov.ts",
     "modificationInfo" : {
       "contentHash" : 270761476,
-      "lastModified" : 1758909392176
+      "lastModified" : 1758910322088
     },
     "linesOfCode" : 176
   }, {
@@ -136,7 +143,7 @@
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
       "contentHash" : 1510562399,
-      "lastModified" : 1758909412384
+      "lastModified" : 1758910322094
     },
     "linesOfCode" : 180
   }, {
