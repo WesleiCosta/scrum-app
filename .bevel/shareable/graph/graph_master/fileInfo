@@ -52,7 +52,7 @@
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
       "contentHash" : 2003459967,
-      "lastModified" : 1758925165011
+      "lastModified" : 1758925736459
     },
     "linesOfCode" : 242
   }, {
@@ -66,14 +66,14 @@
     "path" : "src\\pages\\ConfigurationPage.tsx",
     "modificationInfo" : {
       "contentHash" : 1974087119,
-      "lastModified" : 1758925130529
+      "lastModified" : 1758925736460
     },
     "linesOfCode" : 158
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
       "contentHash" : -1601217551,
-      "lastModified" : 1758925192118
+      "lastModified" : 1758925736462
     },
     "linesOfCode" : 562
   }, {
@@ -94,35 +94,35 @@
     "path" : "src\\pages\\ProjectsPage.tsx",
     "modificationInfo" : {
       "contentHash" : -89982725,
-      "lastModified" : 1758925073020
+      "lastModified" : 1758925736463
     },
     "linesOfCode" : 266
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
       "contentHash" : -1852557803,
-      "lastModified" : 1758925096462
+      "lastModified" : 1758925736464
     },
     "linesOfCode" : 505
   }, {
     "path" : "src\\tests\\scientific-algorithm-tests.ts",
     "modificationInfo" : {
       "contentHash" : 136554804,
-      "lastModified" : 1758925432298
+      "lastModified" : 1758925736466
     },
     "linesOfCode" : 614
   }, {
     "path" : "src\\tests\\test-runner.ts",
     "modificationInfo" : {
       "contentHash" : -838524711,
-      "lastModified" : 1758925493612
+      "lastModified" : 1758925736467
     },
     "linesOfCode" : 83
   }, {
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
       "contentHash" : -1777149488,
-      "lastModified" : 1758924530031
+      "lastModified" : 1758925736468
     },
     "linesOfCode" : 181
   }, {
@@ -136,28 +136,28 @@
     "path" : "src\\utils\\api-integration.ts",
     "modificationInfo" : {
       "contentHash" : -626530860,
-      "lastModified" : 1758925348089
+      "lastModified" : 1758925736469
     },
     "linesOfCode" : 352
   }, {
     "path" : "src\\utils\\constants.ts",
     "modificationInfo" : {
       "contentHash" : 1866332433,
-      "lastModified" : 1758925046696
+      "lastModified" : 1758925736473
     },
     "linesOfCode" : 71
   }, {
     "path" : "src\\utils\\markov.ts",
     "modificationInfo" : {
       "contentHash" : -311113903,
-      "lastModified" : 1758919678480
+      "lastModified" : 1758925736474
     },
     "linesOfCode" : 265
   }, {
     "path" : "src\\utils\\matrix-snapshot-service.ts",
     "modificationInfo" : {
       "contentHash" : -1936900495,
-      "lastModified" : 1758925253648
+      "lastModified" : 1758925736475
     },
     "linesOfCode" : 272
   }, {
@@ -171,35 +171,28 @@
     "path" : "src\\utils\\rubric-service.ts",
     "modificationInfo" : {
       "contentHash" : -921984282,
-      "lastModified" : 1758925223564
+      "lastModified" : 1758925736476
     },
     "linesOfCode" : 214
-  }, {
-    "path" : "src\\utils\\scrum-markov-api.ts",
-    "modificationInfo" : {
-      "contentHash" : -1259282219,
-      "lastModified" : 1758924761435
-    },
-    "linesOfCode" : 240
   }, {
     "path" : "src\\utils\\scrum-markov-engine.ts",
     "modificationInfo" : {
       "contentHash" : -2050722747,
-      "lastModified" : 1758925184323
+      "lastModified" : 1758925736476
     },
     "linesOfCode" : 306
   }, {
     "path" : "src\\utils\\simple-scrum-api.ts",
     "modificationInfo" : {
       "contentHash" : 1064793996,
-      "lastModified" : 1758924791411
+      "lastModified" : 1758925736478
     },
     "linesOfCode" : 233
   }, {
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
       "contentHash" : 1054250134,
-      "lastModified" : 1758925064083
+      "lastModified" : 1758925736479
     },
     "linesOfCode" : 214
   }, {
