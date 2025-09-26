@@ -92,11 +92,27 @@ export const sprintLogsStorage = {
     sprintLogsStorage.set(logs);
   },
   update: (logId: string, updates: Partial<SprintLog>) => {
+    if (!logId || typeof logId !== 'string') {
+      console.error('ID do log inválido para atualização');
+      return;
+    }
+    
     const logs = sprintLogsStorage.get();
     const index = logs.findIndex(l => l.id === logId);
     if (index !== -1) {
-      logs[index] = { ...logs[index], ...updates, updatedAt: new Date().toISOString() };
+      // Validar se as atualizações são válidas
+      const validUpdates = Object.keys(updates).reduce((acc, key) => {
+        const value = updates[key as keyof SprintLog];
+        if (value !== undefined && value !== null) {
+          (acc as any)[key] = value;
+        }
+        return acc;
+      }, {} as Partial<SprintLog>);
+      
+      logs[index] = { ...logs[index], ...validUpdates, updatedAt: new Date().toISOString() };
       sprintLogsStorage.set(logs);
+    } else {
+      console.warn('Log não encontrado para atualização:', logId);
     }
   },
   remove: (logId: string) => {

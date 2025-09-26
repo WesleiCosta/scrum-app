@@ -16,7 +16,12 @@ export function calculateTransitionMatrix(sprintLogs: SprintLog[]): number[][] {
 
   // Mapeia estados para índices usando constante do tipo
   const stateToIndex = (state: ProjectState): number => {
-    return STATE_INDEX_MAP[state];
+    const index = STATE_INDEX_MAP[state];
+    if (index === undefined) {
+      console.warn('Estado desconhecido:', state);
+      return -1; // Índice inválido
+    }
+    return index;
   };
 
   // Conta transições
@@ -139,8 +144,11 @@ export function getMostLikelyState(probabilities: StateProjection['probabilities
   let maxProb = -1;
   let mostLikelyState: ProjectState = 'ESTÁVEL';
 
+  // Validar que o objeto contém pelo menos uma propriedade válida
+  const validStates = ['CRÍTICO', 'RISCO', 'ESTÁVEL', 'BOM', 'EXCELENTE'];
+  
   Object.entries(probabilities).forEach(([state, prob]) => {
-    if (typeof prob === 'number' && !isNaN(prob) && prob > maxProb) {
+    if (validStates.includes(state) && typeof prob === 'number' && !isNaN(prob) && prob >= 0 && prob <= 1 && prob > maxProb) {
       maxProb = prob;
       mostLikelyState = state as ProjectState;
     }

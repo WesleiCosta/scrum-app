@@ -28,29 +28,52 @@ export function SprintProvider({ children }: SprintProviderProps) {
   }, [currentProject]);
 
   const loadProjectData = () => {
-    if (!currentProject) return;
-
-    const logs = sprintLogsStorage.getByProject(currentProject.id);
-    setSprintLogs(logs);
-
-    const matrix = transitionMatricesStorage.getByProject(currentProject.id);
-    setTransitionMatrix(matrix);
-
-    // Recalcula matriz se necessário
-    if (!matrix || logs.length > 0) {
-      refreshMatrix();
+    if (!currentProject || !currentProject.id) {
+      console.warn('Projeto inválido para carregamento de dados');
+      return;
     }
 
-    // Calcula projeções se houver dados suficientes
-    if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION && matrix) {
-      const currentState = logs[logs.length - 1].finalState;
-      const newProjections = calculateProjections(
-        currentState, 
-        matrix.matrix, 
-        APP_CONFIG.PROJECTION_SPRINTS
-      );
-      setProjections(newProjections);
-    } else {
+    try {
+      const logs = sprintLogsStorage.getByProject(currentProject.id);
+      setSprintLogs(logs);
+
+      const matrix = transitionMatricesStorage.getByProject(currentProject.id);
+      setTransitionMatrix(matrix);
+
+      // Recalcula matriz se necessário
+      if (!matrix || logs.length > 0) {
+        // Usar setTimeout para garantir que o estado seja atualizado antes do cálculo
+        setTimeout(() => {
+          const updatedMatrix = calculateTransitionMatrix(logs);
+          const newTransitionMatrix: TransitionMatrix = {
+            projectId: currentProject.id,
+            matrix: updatedMatrix,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          transitionMatricesStorage.upsert(newTransitionMatrix);
+          setTransitionMatrix(newTransitionMatrix);
+          
+          // Calcular projeções após atualizar matriz
+          if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION) {
+            const currentState = logs[logs.length - 1].finalState;
+            const newProjections = calculateProjections(
+              currentState, 
+              updatedMatrix, 
+              APP_CONFIG.PROJECTION_SPRINTS
+            );
+            setProjections(newProjections);
+          } else {
+            setProjections([]);
+          }
+        }, 0);
+      } else {
+        setProjections([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do projeto:', error);
+      setSprintLogs([]);
+      setTransitionMatrix(null);
       setProjections([]);
     }
   };
@@ -61,21 +84,31 @@ export function SprintProvider({ children }: SprintProviderProps) {
       return;
     }
 
-    const newLog: SprintLog = {
-      ...log,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    // Validar dados de entrada
+    if (!log.sprintName || !log.finalState || !log.endDate) {
+      console.error('Erro: Dados obrigatórios não informados');
+      return;
+    }
 
-    sprintLogsStorage.add(newLog);
-    
-    // Atualizar estado local com o novo log
-    const updatedLogs = [...sprintLogs, newLog];
-    setSprintLogs(updatedLogs);
-    
-    // Agendar recalculo da matriz após o estado ser atualizado
-    setTimeout(() => refreshMatrix(), 0);
+    try {
+      const newLog: SprintLog = {
+        ...log,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      sprintLogsStorage.add(newLog);
+      
+      // Atualizar estado local com o novo log
+      const updatedLogs = [...sprintLogs, newLog];
+      setSprintLogs(updatedLogs);
+      
+      // Agendar recalculo da matriz após o estado ser atualizado
+      setTimeout(() => refreshMatrix(), 0);
+    } catch (error) {
+      console.error('Erro ao adicionar sprint log:', error);
+    }
   };
 
   const updateSprintLog = async (logId: string, updates: Partial<SprintLog>): Promise<void> => {
@@ -84,16 +117,20 @@ export function SprintProvider({ children }: SprintProviderProps) {
       return;
     }
 
-    sprintLogsStorage.update(logId, updates);
-    
-    // Atualizar estado local
-    const updatedLogs = sprintLogs.map(log => 
-      log.id === logId ? { ...log, ...updates, updatedAt: new Date().toISOString() } : log
-    );
-    setSprintLogs(updatedLogs);
-    
-    // Agendar recalculo da matriz após o estado ser atualizado
-    setTimeout(() => refreshMatrix(), 0);
+    try {
+      sprintLogsStorage.update(logId, updates);
+      
+      // Atualizar estado local
+      const updatedLogs = sprintLogs.map(log => 
+        log.id === logId ? { ...log, ...updates, updatedAt: new Date().toISOString() } : log
+      );
+      setSprintLogs(updatedLogs);
+      
+      // Agendar recalculo da matriz após o estado ser atualizado
+      setTimeout(() => refreshMatrix(), 0);
+    } catch (error) {
+      console.error('Erro ao atualizar sprint log:', error);
+    }
   };
 
   const deleteSprintLog = async (logId: string): Promise<void> => {
@@ -102,43 +139,51 @@ export function SprintProvider({ children }: SprintProviderProps) {
       return;
     }
 
-    sprintLogsStorage.remove(logId);
-    
-    // Atualizar estado local
-    const updatedLogs = sprintLogs.filter(log => log.id !== logId);
-    setSprintLogs(updatedLogs);
-    
-    // Agendar recalculo da matriz após o estado ser atualizado
-    setTimeout(() => refreshMatrix(), 0);
+    try {
+      sprintLogsStorage.remove(logId);
+      
+      // Atualizar estado local
+      const updatedLogs = sprintLogs.filter(log => log.id !== logId);
+      setSprintLogs(updatedLogs);
+      
+      // Agendar recalculo da matriz após o estado ser atualizado
+      setTimeout(() => refreshMatrix(), 0);
+    } catch (error) {
+      console.error('Erro ao deletar sprint log:', error);
+    }
   };
 
   const refreshMatrix = () => {
     if (!currentProject) return;
 
-    // Usar os logs do estado atual ao invés de buscar do storage novamente
-    const logs = sprintLogs;
-    const matrix = calculateTransitionMatrix(logs);
-    
-    const newTransitionMatrix: TransitionMatrix = {
-      projectId: currentProject.id,
-      matrix,
-      lastUpdated: new Date().toISOString()
-    };
+    try {
+      // Buscar logs atualizados do storage para garantir dados mais recentes
+      const logs = sprintLogsStorage.getByProject(currentProject.id);
+      const matrix = calculateTransitionMatrix(logs);
+      
+      const newTransitionMatrix: TransitionMatrix = {
+        projectId: currentProject.id,
+        matrix,
+        lastUpdated: new Date().toISOString()
+      };
 
-    transitionMatricesStorage.upsert(newTransitionMatrix);
-    setTransitionMatrix(newTransitionMatrix);
+      transitionMatricesStorage.upsert(newTransitionMatrix);
+      setTransitionMatrix(newTransitionMatrix);
 
-    // Calcula projeções após atualizar a matriz
-    if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION) {
-      const currentState = logs[logs.length - 1].finalState;
-      const newProjections = calculateProjections(
-        currentState, 
-        matrix, 
-        APP_CONFIG.PROJECTION_SPRINTS
-      );
-      setProjections(newProjections);
-    } else {
-      setProjections([]);
+      // Calcula projeções após atualizar a matriz
+      if (logs.length >= APP_CONFIG.MIN_SPRINTS_FOR_PREDICTION) {
+        const currentState = logs[logs.length - 1].finalState;
+        const newProjections = calculateProjections(
+          currentState, 
+          matrix, 
+          APP_CONFIG.PROJECTION_SPRINTS
+        );
+        setProjections(newProjections);
+      } else {
+        setProjections([]);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar matriz de transição:', error);
     }
   };
 
@@ -147,14 +192,19 @@ export function SprintProvider({ children }: SprintProviderProps) {
       return [];
     }
 
-    const newProjections = calculateProjections(
-      currentState, 
-      transitionMatrix.matrix, 
-      APP_CONFIG.PROJECTION_SPRINTS
-    );
+    try {
+      const newProjections = calculateProjections(
+        currentState, 
+        transitionMatrix.matrix, 
+        APP_CONFIG.PROJECTION_SPRINTS
+      );
 
-    setProjections(newProjections);
-    return newProjections;
+      setProjections(newProjections);
+      return newProjections;
+    } catch (error) {
+      console.error('Erro ao calcular projeções:', error);
+      return [];
+    }
   };
 
   const value: SprintContextType = {

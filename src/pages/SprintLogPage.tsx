@@ -38,15 +38,29 @@ function SprintLogPage() {
       return;
     }
 
-    // Permitir duração zero apenas para o primeiro sprint
+    // Validação de duração mais robusta
     const isFirstSprint = sprintLogs.length === 0;
-    if (newSprint.sprintDurationDays === null || newSprint.sprintDurationDays === undefined) return;
-    if (newSprint.sprintDurationDays < 0) return;
-    if (!isFirstSprint && newSprint.sprintDurationDays <= 0) return;
+    const duration = newSprint.sprintDurationDays;
+    
+    if (duration === null || duration === undefined || isNaN(duration)) {
+      console.error('Erro: Duração do sprint deve ser um número válido');
+      return;
+    }
+    
+    if (duration < 0) {
+      console.error('Erro: Duração não pode ser negativa');
+      return;
+    }
+    
+    if (!isFirstSprint && duration <= 0) {
+      console.error('Erro: Sprints subsequentes devem ter duração positiva');
+      return;
+    }
     
     // Validar estado final
-    if (!newSprint.finalState) {
-      console.error('Erro: Estado final é obrigatório');
+    const validStates = ['CRÍTICO', 'RISCO', 'ESTÁVEL', 'BOM', 'EXCELENTE'];
+    if (!newSprint.finalState || !validStates.includes(newSprint.finalState)) {
+      console.error('Erro: Estado final é obrigatório e deve ser válido');
       return;
     }
 
@@ -62,15 +76,29 @@ function SprintLogPage() {
       if (currentSprints.length === 0) {
         // Primeiro sprint: data atual + duração informada (pode ser 0)
         const today = new Date();
-        const endDateObj = new Date(today.getTime() + (newSprint.sprintDurationDays * 24 * 60 * 60 * 1000));
+        const safeDuration = isNaN(newSprint.sprintDurationDays) ? 0 : Math.max(0, newSprint.sprintDurationDays);
+        const durationMs = safeDuration * 24 * 60 * 60 * 1000;
+        const endDateObj = new Date(today.getTime() + durationMs);
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
         // Sprints subsequentes: última data de término + 15 dias fixos
         const sortedSprints = [...currentSprints].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
-        const lastSprint = sortedSprints[0];
-        const lastEndDate = new Date(lastSprint.endDate);
-        const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
-        endDate = endDateObj.toISOString().split('T')[0];
+        if (sortedSprints.length === 0) {
+          // Fallback se não há sprints
+          const today = new Date();
+          endDate = new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+        } else {
+          const lastSprint = sortedSprints[0];
+          const lastEndDate = new Date(lastSprint.endDate);
+          // Validar se a data é válida
+          if (isNaN(lastEndDate.getTime())) {
+            const today = new Date();
+            endDate = new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+          } else {
+            const endDateObj = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
+            endDate = endDateObj.toISOString().split('T')[0];
+          }
+        }
       }
       
       await addSprintLog({
@@ -89,6 +117,8 @@ function SprintLogPage() {
       setShowAddForm(false);
     } catch (error) {
       console.error('Erro ao adicionar sprint:', error);
+      // Mostrar feedback visual de erro para o usuário
+      alert('Erro ao adicionar sprint. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -146,8 +176,16 @@ function SprintLogPage() {
                         return endDate.toLocaleDateString('pt-BR');
                       } else {
                         const sortedSprints = [...sprintLogs].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+                        if (sortedSprints.length === 0) {
+                          const today = new Date();
+                          return new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR');
+                        }
                         const lastSprint = sortedSprints[0];
                         const lastEndDate = new Date(lastSprint.endDate);
+                        if (isNaN(lastEndDate.getTime())) {
+                          const today = new Date();
+                          return new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000)).toLocaleDateString('pt-BR');
+                        }
                         const endDate = new Date(lastEndDate.getTime() + (15 * 24 * 60 * 60 * 1000));
                         return endDate.toLocaleDateString('pt-BR');
                       }
