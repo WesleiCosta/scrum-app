@@ -44,10 +44,10 @@
   }, {
     "path" : "src\\contexts\\ProjectContext.tsx",
     "modificationInfo" : {
-      "contentHash" : 1372040148,
-      "lastModified" : 1758898354854
+      "contentHash" : 1752500287,
+      "lastModified" : 1758916905873
     },
-    "linesOfCode" : 171
+    "linesOfCode" : 172
   }, {
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
@@ -114,10 +114,10 @@
   }, {
     "path" : "src\\pages\\ProjectsPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -687144755,
-      "lastModified" : 1758888283676
+      "contentHash" : -1539645977,
+      "lastModified" : 1758916962692
     },
-    "linesOfCode" : 149
+    "linesOfCode" : 264
   }, {
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
@@ -163,10 +163,10 @@
   }, {
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
-      "contentHash" : 235478449,
-      "lastModified" : 1758912699700
+      "contentHash" : -1494678035,
+      "lastModified" : 1758916905881
     },
-    "linesOfCode" : 196
+    "linesOfCode" : 214
   }, {
     "path" : "src\\utils\\tools-integration.ts",
     "modificationInfo" : {

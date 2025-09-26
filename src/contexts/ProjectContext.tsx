@@ -94,7 +94,8 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
       throw new Error('Apenas o administrador pode deletar o projeto');
     }
 
-    projectsStorage.remove(projectId);
+    // Remover todos os dados associados ao projeto
+    projectsStorage.removeProjectWithSprints(projectId);
     setProjects(prev => prev.filter(p => p.id !== projectId));
 
     if (currentProject?.id === projectId) {

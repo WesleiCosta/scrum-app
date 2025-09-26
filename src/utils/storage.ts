@@ -77,6 +77,24 @@ export const projectsStorage = {
     const projects = projectsStorage.get();
     const filtered = projects.filter(p => p.id !== projectId);
     projectsStorage.set(filtered);
+  },
+  removeProjectWithSprints: (projectId: string) => {
+    // Remover o projeto
+    const projects = projectsStorage.get();
+    const filtered = projects.filter(p => p.id !== projectId);
+    projectsStorage.set(filtered);
+    
+    // Remover todos os sprints associados ao projeto
+    const sprintLogs = sprintLogsStorage.get();
+    const filteredSprints = sprintLogs.filter(log => log.projectId !== projectId);
+    sprintLogsStorage.set(filteredSprints);
+    
+    // Remover matriz de transição associada ao projeto
+    const matrices = transitionMatricesStorage.get();
+    const filteredMatrices = matrices.filter(m => m.projectId !== projectId);
+    transitionMatricesStorage.set(filteredMatrices);
+    
+    console.log(`Projeto ${projectId} e todos os dados associados foram removidos`);
   }
 };
 
