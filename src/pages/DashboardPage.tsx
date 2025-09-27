@@ -617,142 +617,346 @@ const DashboardPage: React.FC = () => {
 
         {/* Dashboard Estatístico */}
         {selectedDashboard === 'statistical' && (
-          <div className="space-y-8">
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
             
-            {/* Matriz de Transição */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">🔢 Matriz de Transição</h2>
-                  <p className="text-sm text-gray-600">
-                    Probabilidades de transição entre estados baseada nos últimos {windowSize} sprints
-                  </p>
-                </div>
-                
-                {/* Legenda de Cores */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Legenda:</h4>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(34, 197, 94, 0.7)' }}></div>
-                      <span>Melhoria/Estabilidade Positiva</span>
+            {/* Header da Análise Estatística */}
+            <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-6 mb-8">
+              <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent mb-2">
+                      � Análise Estatística Avançada
+                    </h1>
+                    <p className="text-slate-600 text-lg">
+                      Matriz de Markov e probabilidades de transição entre estados
+                    </p>
+                  </div>
+                  
+                  {/* Métricas Resumo */}
+                  <div className="flex flex-wrap gap-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center min-w-[120px]">
+                      <div className="text-2xl font-bold text-blue-700">{windowSize}</div>
+                      <div className="text-xs font-medium text-blue-600 uppercase tracking-wide">Janela Análise</div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}></div>
-                      <span>Manutenção do Estado</span>
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center min-w-[120px]">
+                      <div className="text-2xl font-bold text-purple-700">{historicoEstados.length}</div>
+                      <div className="text-xs font-medium text-purple-600 uppercase tracking-wide">Sprints Total</div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(239, 68, 68, 0.7)' }}></div>
-                      <span>Degradação/Risco</span>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center min-w-[120px]">
+                      <div className="text-2xl font-bold text-emerald-700">
+                        {historicoEstados.length > 1 ? historicoEstados.length - 1 : 0}
+                      </div>
+                      <div className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Transições</div>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300 shadow-sm">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
-                      <th className="border border-gray-300 p-4 bg-gray-200 font-bold text-gray-800">
-                        <div className="flex flex-col items-center">
-                          <span>De ↓ / Para →</span>
-                          <span className="text-xs text-gray-600 mt-1">Probabilidade (%)</span>
-                        </div>
-                      </th>
-                      {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map(estado => (
-                        <th key={estado} className={`border border-gray-300 p-4 ${getCoresEstado(estado).bg} ${getCoresEstado(estado).text}`}>
-                          <div className="flex flex-col items-center">
-                            <span className="flex items-center">
-                              {getCoresEstado(estado).icon} {estado}
-                            </span>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
-                      <tr key={fromState} className="hover:bg-gray-50 transition-colors duration-150">
-                        <td className={`border border-gray-300 p-4 font-bold ${getCoresEstado(fromState).bg} ${getCoresEstado(fromState).text}`}>
-                          <div className="flex items-center justify-center">
-                            <span className="mr-2">{getCoresEstado(fromState).icon}</span>
-                            {fromState}
-                          </div>
-                        </td>
-                        {matrizTransicao[i].map((value, j) => {
-                          const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
-                          const cores = getCoresMatrizTransicao(fromState, toState, value);
-                          
-                          return (
-                            <td 
-                              key={j} 
-                              className={`border ${cores.borderColor} p-4 text-center ${cores.textColor} transition-all duration-200 hover:scale-105 hover:shadow-lg cursor-help relative group`}
-                              style={{ backgroundColor: cores.backgroundColor }}
-                              title={`${fromState} → ${toState}: ${formatarProbabilidade(value)} ${
-                                fromState === toState ? '(Estabilidade)' : 
-                                (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? '(Melhoria)' : '(Degradação)'
-                              }`}
-                            >
-                              <div className="flex flex-col items-center">
-                                <span className="text-xl font-bold">{formatarProbabilidade(value)}</span>
-                                {value > 0.05 && (
-                                  <span className="text-xs mt-1 opacity-75 font-medium">
-                                    {value > 0.7 ? 'Alta' : value > 0.3 ? 'Média' : 'Baixa'}
-                                  </span>
-                                )}
-                                {value < 0.01 && value > 0 && (
-                                  <span className="text-xs mt-1 opacity-50">Rara</span>
-                                )}
-                              </div>
-                              
-                              {/* Tooltip hover - aparece apenas em valores significativos */}
-                              {value > 0.1 && (
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                                  {fromState === toState ? 
-                                    `Mantém ${fromState.toLowerCase()}` : 
-                                    (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? 
-                                    'Melhoria do projeto' : 
-                                    'Degradação do projeto'
-                                  }
-                                </div>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
 
-            {/* Histórico de Transições */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">🔄 Histórico de Transições</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {historicoEstados.length > 1 ? 
-                  historicoEstados.slice(1).map((estado: UnifiedState, index: number) => {
-                    const estadoAnterior = historicoEstados[index];
-                    return (
-                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-600">
-                          Sprint {index + 1} → {index + 2}:
-                        </span>
-                        <span className={`px-3 py-1 rounded text-sm font-medium ${getCoresEstado(estadoAnterior).bg} ${getCoresEstado(estadoAnterior).text}`}>
-                          {estadoAnterior}
-                        </span>
-                        <span className="text-gray-400">→</span>
-                        <span className={`px-3 py-1 rounded text-sm font-medium ${getCoresEstado(estado).bg} ${getCoresEstado(estado).text}`}>
-                          {estado}
-                        </span>
+            <div className="max-w-7xl mx-auto px-6 space-y-8">
+              
+              {/* Layout Grid Principal */}
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                
+                {/* Coluna Principal - Matriz de Transição */}
+                <div className="xl:col-span-3">
+                  <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-slate-200/50">
+                    <div className="flex flex-col lg:flex-row justify-between items-start mb-8">
+                      <div>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-3 flex items-center gap-3">
+                          🔢 Matriz de Transição de Estados
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Probabilidades P<sub>ij</sub> calculadas com base nos últimos <strong>{windowSize}</strong> sprints
+                        </p>
+                        <p className="text-sm text-slate-500 mt-2">
+                          Fórmula: P<sub>ij</sub> = n<sub>ij</sub> / Σ<sub>k</sub>(n<sub>ik</sub>)
+                        </p>
                       </div>
-                    );
-                  })
-                : (
-                  <div className="text-center py-8 text-gray-500">
-                    Nenhuma transição registrada ainda
+                    </div>
+                    
+                    {/* Matriz de Transição Redesenhada */}
+                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-6 border border-slate-200">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-separate border-spacing-2">
+                          <thead>
+                            <tr>
+                              <th className="bg-slate-800 text-white p-4 rounded-tl-xl font-bold text-center">
+                                <div className="flex flex-col items-center space-y-1">
+                                  <span className="text-lg">Estado Origem</span>
+                                  <span className="text-xs opacity-75">↓ De \ Para →</span>
+                                </div>
+                              </th>
+                              {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((estado, index) => (
+                                <th key={estado} className={`p-4 font-bold text-center rounded-t-xl ${
+                                  index === 0 ? 'bg-emerald-600 text-white' :
+                                  index === 1 ? 'bg-amber-500 text-white' :
+                                  'bg-red-600 text-white'
+                                }`}>
+                                  <div className="flex flex-col items-center space-y-1">
+                                    <span className="text-lg">{getCoresEstado(estado).icon}</span>
+                                    <span className="text-sm font-semibold">{estado}</span>
+                                  </div>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
+                              <tr key={fromState}>
+                                <td className={`p-4 font-bold text-center rounded-l-xl ${
+                                  i === 0 ? 'bg-emerald-600 text-white' :
+                                  i === 1 ? 'bg-amber-500 text-white' :
+                                  'bg-red-600 text-white'
+                                }`}>
+                                  <div className="flex flex-col items-center space-y-1">
+                                    <span className="text-lg">{getCoresEstado(fromState).icon}</span>
+                                    <span className="text-sm font-semibold">{fromState}</span>
+                                  </div>
+                                </td>
+                                {matrizTransicao[i].map((value, j) => {
+                                  const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
+                                  const cores = getCoresMatrizTransicao(fromState, toState, value);
+                                  
+                                  return (
+                                    <td 
+                                      key={j} 
+                                      className={`text-center transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-help relative group rounded-xl border-2 ${cores.borderColor} ${
+                                        j === 2 && i === (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).length - 1 ? 'rounded-br-xl' : ''
+                                      }`}
+                                      style={{ 
+                                        backgroundColor: cores.backgroundColor,
+                                        minHeight: '80px',
+                                        minWidth: '120px'
+                                      }}
+                                      title={`Transição ${fromState} → ${toState}: ${formatarProbabilidade(value)} ${
+                                        fromState === toState ? '(Estabilidade)' : 
+                                        (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? '(Melhoria)' : '(Degradação)'
+                                      }`}
+                                    >
+                                      <div className="flex flex-col items-center justify-center p-4 h-full">
+                                        <div className={`text-3xl font-black mb-1 ${cores.textColor}`}>
+                                          {formatarProbabilidade(value)}
+                                        </div>
+                                        
+                                        {/* Barra de Intensidade */}
+                                        <div className="w-full bg-white/30 rounded-full h-2 mb-2">
+                                          <div 
+                                            className="bg-current h-2 rounded-full transition-all duration-500"
+                                            style={{ width: `${Math.min(value * 100, 100)}%` }}
+                                          />
+                                        </div>
+                                        
+                                        {/* Classificação */}
+                                        <div className={`text-xs font-bold uppercase tracking-wider ${cores.textColor} opacity-80`}>
+                                          {value > 0.7 ? '🔥 Muito Alta' : 
+                                           value > 0.4 ? '📈 Alta' : 
+                                           value > 0.2 ? '📊 Média' : 
+                                           value > 0.05 ? '📉 Baixa' : 
+                                           value > 0 ? '🔍 Rara' : '❌ Nula'}
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Tooltip Avançado */}
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 px-4 py-3 bg-slate-900 text-white text-sm rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-20 border border-slate-700">
+                                        <div className="text-center">
+                                          <div className="font-bold text-lg mb-1">{fromState} → {toState}</div>
+                                          <div className="text-slate-300 mb-2">{formatarProbabilidade(value)} de probabilidade</div>
+                                          <div className={`text-xs px-2 py-1 rounded-full ${
+                                            fromState === toState ? 'bg-blue-600' : 
+                                            (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? 'bg-green-600' : 'bg-red-600'
+                                          }`}>
+                                            {fromState === toState ? 'Mantém Estado' : 
+                                             (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? 'Melhoria' : 'Degradação'}
+                                          </div>
+                                        </div>
+                                        {/* Seta do tooltip */}
+                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                                          <div className="border-4 border-transparent border-t-slate-900"></div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* Coluna Lateral - Legenda e Informações */}
+                <div className="xl:col-span-1 space-y-6">
+                  
+                  {/* Legenda Aprimorada */}
+                  <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-slate-200/50">
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      🎨 Legenda de Cores
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-green-500"></div>
+                        <div>
+                          <div className="font-semibold text-emerald-800 text-sm">Melhoria</div>
+                          <div className="text-xs text-emerald-600">Transição para estado superior</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500"></div>
+                        <div>
+                          <div className="font-semibold text-amber-800 text-sm">Estabilidade</div>
+                          <div className="text-xs text-amber-600">Permanência no estado atual</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg border border-red-200">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-red-400 to-rose-500"></div>
+                        <div>
+                          <div className="font-semibold text-red-800 text-sm">Degradação</div>
+                          <div className="text-xs text-red-600">Transição para estado inferior</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Análise Estatística */}
+                  <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-slate-200/50">
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      📈 Análise Rápida
+                    </h3>
+                    <div className="space-y-4">
+                      {/* Estado mais provável de manter */}
+                      {(() => {
+                        const maiorEstabilidade = Math.max(matrizTransicao[0][0], matrizTransicao[1][1], matrizTransicao[2][2]);
+                        const estadoMaisEstavel = maiorEstabilidade === matrizTransicao[0][0] ? 'Saudável' : 
+                                                 maiorEstabilidade === matrizTransicao[1][1] ? 'Em Risco' : 'Crítico';
+                        return (
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="text-sm font-semibold text-blue-800">Estado mais estável:</div>
+                            <div className="text-lg font-bold text-blue-900">{estadoMaisEstavel}</div>
+                            <div className="text-xs text-blue-600">{formatarProbabilidade(maiorEstabilidade)} de permanência</div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Maior risco de degradação */}
+                      {(() => {
+                        let maiorRisco = 0;
+                        let origemRisco = '';
+                        let destinoRisco = '';
+                        
+                        for (let i = 0; i < 2; i++) {
+                          for (let j = i + 1; j < 3; j++) {
+                            if (matrizTransicao[i][j] > maiorRisco) {
+                              maiorRisco = matrizTransicao[i][j];
+                              origemRisco = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[i];
+                              destinoRisco = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
+                            }
+                          }
+                        }
+                        
+                        return maiorRisco > 0.1 ? (
+                          <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                            <div className="text-sm font-semibold text-orange-800">Maior risco:</div>
+                            <div className="text-sm font-bold text-orange-900">{origemRisco} → {destinoRisco}</div>
+                            <div className="text-xs text-orange-600">{formatarProbabilidade(maiorRisco)} de probabilidade</div>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Histórico de Transições Redesenhado */}
+              <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-slate-200/50">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                    🔄 Linha do Tempo das Transições
+                  </h3>
+                  <div className="text-sm text-slate-500 bg-slate-100 px-4 py-2 rounded-full">
+                    {historicoEstados.length > 1 ? historicoEstados.length - 1 : 0} transições registradas
+                  </div>
+                </div>
+                
+                <div className="relative">
+                  {historicoEstados.length > 1 ? (
+                    <div className="space-y-4">
+                      {/* Linha temporal */}
+                      <div className="flex flex-wrap gap-2 justify-center mb-8">
+                        {historicoEstados.slice(1).map((estado: UnifiedState, index: number) => {
+                          const estadoAnterior = historicoEstados[index];
+                          const isImprovement = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(estado) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(estadoAnterior);
+                          const isDegradation = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(estado) > (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(estadoAnterior);
+                          
+                          return (
+                            <div key={index} className="flex items-center">
+                              {/* Card da Transição */}
+                              <div className={`
+                                p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 cursor-pointer
+                                ${isImprovement ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-300 hover:shadow-emerald-200' :
+                                  isDegradation ? 'bg-gradient-to-r from-red-50 to-rose-50 border-red-300 hover:shadow-red-200' :
+                                  'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 hover:shadow-blue-200'}
+                                hover:shadow-xl
+                              `}>
+                                <div className="text-center">
+                                  <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                                    Sprint {index + 1} → {index + 2}
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-center space-x-3">
+                                    <div className={`flex flex-col items-center px-3 py-2 rounded-lg ${getCoresEstado(estadoAnterior).bg}`}>
+                                      <span className="text-lg">{getCoresEstado(estadoAnterior).icon}</span>
+                                      <span className="text-xs font-semibold">{estadoAnterior}</span>
+                                    </div>
+                                    
+                                    <div className={`
+                                      text-2xl transition-transform duration-300 hover:scale-125
+                                      ${isImprovement ? 'text-emerald-600' :
+                                        isDegradation ? 'text-red-600' : 'text-blue-600'}
+                                    `}>
+                                      {isImprovement ? '⬆️' : isDegradation ? '⬇️' : '↔️'}
+                                    </div>
+                                    
+                                    <div className={`flex flex-col items-center px-3 py-2 rounded-lg ${getCoresEstado(estado).bg}`}>
+                                      <span className="text-lg">{getCoresEstado(estado).icon}</span>
+                                      <span className="text-xs font-semibold">{estado}</span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className={`
+                                    text-xs font-bold mt-2 px-2 py-1 rounded-full
+                                    ${isImprovement ? 'text-emerald-800 bg-emerald-100' :
+                                      isDegradation ? 'text-red-800 bg-red-100' :
+                                      'text-blue-800 bg-blue-100'}
+                                  `}>
+                                    {isImprovement ? 'MELHORIA' : isDegradation ? 'DEGRADAÇÃO' : 'ESTÁVEL'}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Conectores */}
+                              {index < historicoEstados.slice(1).length - 1 && (
+                                <div className="mx-2 text-slate-400 text-xl">
+                                  ▶️
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">📊</div>
+                      <h4 className="text-xl font-bold text-slate-600 mb-2">Aguardando Dados</h4>
+                      <p className="text-slate-500">
+                        Nenhuma transição registrada ainda. Complete mais sprints para ver as análises.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
