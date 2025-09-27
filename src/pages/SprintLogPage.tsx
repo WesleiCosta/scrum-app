@@ -41,13 +41,22 @@ function SprintLogPage() {
     // Validação de duração mais robusta
     const duration = newSprint.sprintDurationDays;
     
+    // Validação robusta de duração
     if (duration === null || duration === undefined || isNaN(duration)) {
       console.error('Erro: Duração do sprint deve ser um número válido');
+      setLoading(false);
       return;
     }
     
     if (duration < 0) {
       console.error('Erro: Duração não pode ser negativa');
+      setLoading(false);
+      return;
+    }
+    
+    if (duration > 365) {
+      console.error('Erro: Duração não pode ser maior que 365 dias');
+      setLoading(false);
       return;
     }
     
@@ -57,7 +66,8 @@ function SprintLogPage() {
     // Validar estado final
     const validStates: ProjectState[] = ['EXCELENTE', 'BOM', 'ESTÁVEL', 'RISCO', 'CRÍTICO'];
     if (!newSprint.finalState || !validStates.includes(newSprint.finalState)) {
-      console.error('Erro: Estado final é obrigatório e deve ser válido');
+      console.error('Erro: Estado final é obrigatório e deve ser válido:', newSprint.finalState);
+      setLoading(false);
       return;
     }
 
@@ -92,7 +102,7 @@ function SprintLogPage() {
         let baseDate = new Date(lastSprint.endDate);
         
         // Validar se a data do último sprint é válida
-        if (isNaN(baseDate.getTime())) {
+        if (isNaN(baseDate.getTime()) || baseDate.getFullYear() < 1970 || baseDate.getFullYear() > 2100) {
           console.warn('Data inválida no último sprint, usando data atual');
           baseDate = today;
         }

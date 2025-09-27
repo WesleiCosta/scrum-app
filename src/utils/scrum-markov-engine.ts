@@ -16,6 +16,13 @@ import {
   UNIFIED_STATE_MAP 
 } from '../types';
 
+// Função de log condicional para desenvolvimento
+const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+const devLog = {
+  warn: (message: string, ...args: any[]) => isDev && console.warn(message, ...args),
+  error: (message: string, ...args: any[]) => isDev && console.error(message, ...args)
+};
+
 export class ScrumMarkovEngine {
   /**
    * Algoritmo de Classificação de Estado de Sprint - Seção 3.1
@@ -27,12 +34,12 @@ export class ScrumMarkovEngine {
   ): UnifiedState {
     // Validação de entrada
     if (!sprintMetrics || typeof sprintMetrics !== 'object') {
-      console.warn('Métricas de sprint inválidas ou ausentes. Usando fallback.');
+      devLog.warn('Métricas de sprint inválidas ou ausentes. Usando fallback.');
       return 'Em Risco';
     }
     
     if (!rubricCriteria || rubricCriteria.length === 0) {
-      console.warn('Critérios de rubrica ausentes. Usando fallback.');
+      devLog.warn('Critérios de rubrica ausentes. Usando fallback.');
       return 'Em Risco';
     }
     // Agrupar critérios por estado, ordenados por criticidade (3 -> 2 -> 1)
@@ -61,7 +68,7 @@ export class ScrumMarkovEngine {
     }
 
     // Fallback: se nenhuma regra correspondeu, usar estado conservador
-    console.warn('Nenhum critério de rubrica correspondeu às métricas da sprint. Usando fallback para estado Em Risco.');
+    devLog.warn('Nenhum critério de rubrica correspondeu às métricas da sprint. Usando fallback para estado Em Risco.');
     return 'Em Risco';
   }
 
@@ -76,7 +83,10 @@ export class ScrumMarkovEngine {
       case 'LTE': return metricValue <= criterion.thresholdValue;
       case 'GT': return metricValue > criterion.thresholdValue;
       case 'LT': return metricValue < criterion.thresholdValue;
-      case 'EQ': return Math.abs(metricValue - criterion.thresholdValue) < 0.001; // Tolerância padronizada
+      case 'EQ': {
+        const TOLERANCE = 0.001; // Tolerância padronizada em todo o sistema
+        return Math.abs(metricValue - criterion.thresholdValue) < TOLERANCE;
+      }
       default: return false;
     }
   }

@@ -14,16 +14,30 @@ function isLocalStorageAvailable(): boolean {
 }
 
 // Funções genéricas para localStorage
-export function setStorageItem<T>(key: string, value: T): void {
+export function setStorageItem<T>(key: string, value: T): boolean {
   if (!isLocalStorageAvailable()) {
     console.warn('localStorage não está disponível. Dados não serão persistidos.');
-    return;
+    // Notificar usuário sobre problema de armazenamento
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('storage-unavailable', { 
+        detail: { message: 'Dados não podem ser salvos. Verifique as configurações do navegador.' }
+      }));
+    }
+    return false;
   }
   
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch (error) {
     console.error('Erro ao salvar no localStorage:', error);
+    // Tentar notificar sobre erro de salvamento
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('storage-error', { 
+        detail: { message: 'Erro ao salvar dados. Espaço em disco pode estar cheio.' }
+      }));
+    }
+    return false;
   }
 }
 
@@ -35,9 +49,23 @@ export function getStorageItem<T>(key: string, defaultValue: T): T {
   
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    if (!item) return defaultValue;
+    
+    const parsed = JSON.parse(item);
+    // Validação adicional do tipo de dados
+    if (typeof parsed !== typeof defaultValue && defaultValue !== null) {
+      console.warn(`Tipo de dados inconsistente no localStorage para key '${key}'. Usando valor padrão.`);
+      return defaultValue;
+    }
+    return parsed;
   } catch (error) {
-    console.error('Erro ao ler do localStorage:', error);
+    console.error('Erro ao ler do localStorage:', error, 'key:', key);
+    // Tentar limpar a entrada corrompida
+    try {
+      localStorage.removeItem(key);
+    } catch (cleanupError) {
+      console.error('Erro ao limpar entrada corrompida:', cleanupError);
+    }
     return defaultValue;
   }
 }
@@ -60,23 +88,30 @@ export const userStorage = {
 export const projectsStorage = {
   get: (): Project[] => getStorageItem(STORAGE_KEYS.PROJECTS, []),
   set: (projects: Project[]) => setStorageItem(STORAGE_KEYS.PROJECTS, projects),
-  add: (project: Project) => {
+  add: (project: Project): boolean => {
     const projects = projectsStorage.get();
     projects.push(project);
-    projectsStorage.set(projects);
+    return projectsStorage.set(projects);
   },
-  update: (projectId: string, updates: Partial<Project>) => {
+  update: (projectId: string, updates: Partial<Project>): boolean => {
+    if (!projectId || typeof projectId !== 'string') {
+      console.error('ID do projeto inválido para atualização');
+      return false;
+    }
+    
     const projects = projectsStorage.get();
     const index = projects.findIndex(p => p.id === projectId);
     if (index !== -1) {
       projects[index] = { ...projects[index], ...updates, updatedAt: new Date().toISOString() };
-      projectsStorage.set(projects);
+      return projectsStorage.set(projects);
     }
+    console.warn('Projeto não encontrado para atualização:', projectId);
+    return false;
   },
-  remove: (projectId: string) => {
+  remove: (projectId: string): boolean => {
     const projects = projectsStorage.get();
     const filtered = projects.filter(p => p.id !== projectId);
-    projectsStorage.set(filtered);
+    return projectsStorage.set(filtered);
   },
   removeProjectWithSprints: (projectId: string) => {
     // Remover o projeto
@@ -109,10 +144,10 @@ export const sprintLogsStorage = {
     logs.push(log);
     sprintLogsStorage.set(logs);
   },
-  update: (logId: string, updates: Partial<SprintLog>) => {
+  update: (logId: string, updates: Partial<SprintLog>): boolean => {
     if (!logId || typeof logId !== 'string') {
       console.error('ID do log inválido para atualização');
-      return;
+      return false;
     }
     
     const logs = sprintLogsStorage.get();
@@ -128,9 +163,10 @@ export const sprintLogsStorage = {
       }, {} as Partial<SprintLog>);
       
       logs[index] = { ...logs[index], ...validUpdates, updatedAt: new Date().toISOString() };
-      sprintLogsStorage.set(logs);
+      return sprintLogsStorage.set(logs);
     } else {
       console.warn('Log não encontrado para atualização:', logId);
+      return false;
     }
   },
   remove: (logId: string) => {

@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSprint } from '../contexts/SprintContext';
 import { useProject } from '../contexts/ProjectContext';
 import { ProjectState, UnifiedState, TransitionMatrix, StatePrediction } from '../types';
 import { ScrumMarkovEngine, ScenarioAnalysisUtils } from '../utils/scrum-markov-engine';
+import { debounce, sanitizeUserInput } from '../utils/debounce';
 
 const DashboardPage: React.FC = () => {
   const { sprintLogs } = useSprint();
@@ -170,7 +171,7 @@ const DashboardPage: React.FC = () => {
         recente: taxas.recente
       }
     };
-  }, [sprintLogs]);
+  }, [sprintLogs.length, sprintLogs.slice(-5).map(log => log.finalState).join('')]);  // Otimização: apenas recomputa com mudanças relevantes
 
   // Dados computados usando o motor Scrum-Markov
   const dadosComputados = useMemo(() => {
@@ -201,7 +202,7 @@ const DashboardPage: React.FC = () => {
       previsoes,
       windowSize
     };
-  }, [sprintLogs, currentProject]);
+  }, [sprintLogs.length, currentProject?.nValue, sprintLogs.slice(-10)]);  // Otimização: dependencies específicas
 
   const { historicoEstados, estadoAtual, matrizTransicao, previsoes, windowSize } = dadosComputados;
 
@@ -219,9 +220,14 @@ const DashboardPage: React.FC = () => {
     );
   }, [estadoAtual, matrizTransicao, whatIfMatrix, showWhatIfAnalysis]);
 
-  const editarMatrizWhatIf = (i: number, j: number, valor: string) => {
-    const novoValor = parseFloat(valor) / 100; // Converter de % para decimal
-    if (isNaN(novoValor) || novoValor < 0 || novoValor > 1) return;
+  const editarMatrizWhatIfDebounced = useCallback(
+    debounce((i: number, j: number, valor: string) => {
+      // Validação robusta de entrada usando utilitários
+      const valorLimpo = sanitizeUserInput(valor, 'percentage');
+      if (!valorLimpo) return;
+      
+      const novoValor = parseFloat(valorLimpo) / 100; // Converter de % para decimal
+      if (isNaN(novoValor) || novoValor < 0 || novoValor > 1) return;
 
     const novaMatriz = whatIfMatrix ? 
       whatIfMatrix.map(row => [...row]) : 
@@ -235,8 +241,10 @@ const DashboardPage: React.FC = () => {
       novaMatriz[i] = novaMatriz[i].map(val => val / somaLinha);
     }
     
-    setWhatIfMatrix(novaMatriz);
-  };
+      setWhatIfMatrix(novaMatriz);
+    }, 300), // 300ms debounce
+    [whatIfMatrix, matrizTransicao]
+  );
 
   const getCoresEstado = (estado: UnifiedState) => {
     switch (estado) {
@@ -781,7 +789,7 @@ const DashboardPage: React.FC = () => {
                               max="100"
                               step="1"
                               value={Math.round(value * 100)}
-                              onChange={(e) => editarMatrizWhatIf(i, j, e.target.value)}
+                              onChange={(e) => editarMatrizWhatIfDebounced(i, j, e.target.value)}
                               className="w-16 p-1 border rounded text-center text-sm"
                             />
                           ))}

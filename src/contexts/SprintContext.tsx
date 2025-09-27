@@ -18,13 +18,23 @@ export function SprintProvider({ children }: SprintProviderProps) {
   const [projections, setProjections] = useState<StateProjection[]>([]);
 
   useEffect(() => {
-    if (currentProject) {
-      loadProjectData();
-    } else {
-      setSprintLogs([]);
-      setTransitionMatrix(null);
-      setProjections([]);
-    }
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (currentProject && isMounted) {
+        await loadProjectData();
+      } else if (isMounted) {
+        setSprintLogs([]);
+        setTransitionMatrix(null);
+        setProjections([]);
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [currentProject]);
 
   const loadProjectData = () => {

@@ -161,8 +161,12 @@ export function integrateAutomaticMetrics(
     );
   }
   
-  if (sprintData.completedStoryPoints > 0) {
+  // Bug Rate (bugs per story point) - com validação de divisão por zero
+  if (sprintData.bugCount !== undefined && sprintData.completedStoryPoints > 0) {
     metrics['bug-rate'] = sprintData.bugCount / sprintData.completedStoryPoints;
+  } else if (sprintData.bugCount !== undefined) {
+    // Se não há story points completados mas há bugs, usar taxa máxima como fallback
+    metrics['bug-rate'] = sprintData.bugCount > 0 ? 1 : 0;
   }
   
   if (sprintData.codeCoverage !== undefined) {

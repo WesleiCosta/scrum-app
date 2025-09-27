@@ -121,9 +121,12 @@ export function integrateGitMetrics(gitData: GitData): { [metricId: string]: num
   );
   metrics['technical-debt'] = techDebtScore;
 
-  // Bug Rate (bugs per commit or similar)
-  if (gitData.commits > 0) {
+  // Bug Rate (bugs per commit or similar) - com validação de divisão por zero
+  if (gitData.codeQuality.bugs !== undefined && gitData.commits > 0) {
     metrics['bug-rate'] = gitData.codeQuality.bugs / gitData.commits;
+  } else if (gitData.codeQuality.bugs !== undefined) {
+    // Se não há commits mas há bugs, usar taxa conservadora
+    metrics['bug-rate'] = gitData.codeQuality.bugs > 0 ? 0.5 : 0;
   }
 
   // Feature Acceptance (baseado em PR merge rate)

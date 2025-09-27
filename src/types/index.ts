@@ -159,6 +159,7 @@ export interface AuthContextType {
 export interface ProjectContextType {
   currentProject: Project | null;
   projects: Project[];
+  loading: boolean;
   setCurrentProject: (project: Project | null) => void;
   createProject: (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'adminId'>) => Promise<Project>;
   updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>;

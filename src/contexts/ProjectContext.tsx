@@ -14,6 +14,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
   const { user } = useAuth();
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -41,6 +42,9 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
     if (!user) {
       throw new Error('Usuário não autenticado');
     }
+    
+    setLoading(true);
+    try {
 
     const newProject: Project = {
       ...projectData,
@@ -51,9 +55,19 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
       updatedAt: new Date().toISOString()
     };
 
-    projectsStorage.add(newProject);
-    setProjects(prev => [...prev, newProject]);
-    return newProject;
+      const success = projectsStorage.add(newProject);
+      if (!success) {
+        throw new Error('Falha ao salvar projeto. Verifique o espaço de armazenamento.');
+      }
+      
+      setProjects(prev => [...prev, newProject]);
+      return newProject;
+    } catch (error) {
+      console.error('Erro ao criar projeto:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateProject = async (projectId: string, updates: Partial<Project>): Promise<void> => {
@@ -147,6 +161,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
   const value: ProjectContextType = {
     currentProject,
     projects,
+    loading,
     setCurrentProject,
     createProject,
     updateProject,
