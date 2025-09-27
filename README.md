@@ -32,6 +32,34 @@ Sistema inteligente que utiliza **Cadeias de Markov** para análise preditiva de
 
 ###  Como Executar
 
+#### 🚀 Execução Local Simplificada (SEM Visual Studio Code)
+
+**Instalação Automática:**
+```bash
+# Windows:
+INSTALAR.bat
+
+# Linux/Mac:  
+./INSTALAR.sh
+```
+
+**Execução:**
+```bash
+# Windows:
+executar-local.bat
+
+# Linux/Mac:
+./executar-local.sh
+
+# PowerShell (Windows):
+.\executar-local.ps1
+
+# NPM (qualquer OS):
+npm run start:local
+```
+
+#### 💻 Desenvolvimento
+
 ```bash
 # Instalar dependências
 npm install
@@ -41,6 +69,9 @@ npm run dev
 
 # Build para produção
 npm run build
+
+# Servir build local
+npm run serve
 ```
 
 ###  Performance

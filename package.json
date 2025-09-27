@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "serve": "serve -s dist -l 3000",
+    "start:local": "npm run build && npm run serve",
     "deploy:vercel": "vercel --prod",
     "deploy:build": "npm run build && npm run preview",
     "type-check": "tsc --noEmit",
