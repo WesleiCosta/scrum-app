@@ -45,14 +45,14 @@
     "path" : "src\\contexts\\ProjectContext.tsx",
     "modificationInfo" : {
       "contentHash" : 1712724256,
-      "lastModified" : 1758932400040
+      "lastModified" : 1758932830623
     },
     "linesOfCode" : 187
   }, {
     "path" : "src\\contexts\\SprintContext.tsx",
     "modificationInfo" : {
       "contentHash" : 1029587763,
-      "lastModified" : 1758932143155
+      "lastModified" : 1758932830624
     },
     "linesOfCode" : 252
   }, {
@@ -72,10 +72,10 @@
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
-      "contentHash" : 261687735,
-      "lastModified" : 1758932470398
+      "contentHash" : 982946681,
+      "lastModified" : 1758969220458
     },
-    "linesOfCode" : 938
+    "linesOfCode" : 1058
   }, {
     "path" : "src\\pages\\LoginPage.tsx",
     "modificationInfo" : {
@@ -101,7 +101,7 @@
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
       "contentHash" : 1255810066,
-      "lastModified" : 1758932216192
+      "lastModified" : 1758932830627
     },
     "linesOfCode" : 527
   }, {
@@ -122,7 +122,7 @@
     "path" : "src\\types\\index.ts",
     "modificationInfo" : {
       "contentHash" : -1709456104,
-      "lastModified" : 1758932377011
+      "lastModified" : 1758932830628
     },
     "linesOfCode" : 182
   }, {
@@ -150,7 +150,7 @@
     "path" : "src\\utils\\debounce.ts",
     "modificationInfo" : {
       "contentHash" : 1846858184,
-      "lastModified" : 1758932439214
+      "lastModified" : 1758932830630
     },
     "linesOfCode" : 97
   }, {
@@ -171,7 +171,7 @@
     "path" : "src\\utils\\quantified-states.ts",
     "modificationInfo" : {
       "contentHash" : -1386935018,
-      "lastModified" : 1758932155285
+      "lastModified" : 1758932830630
     },
     "linesOfCode" : 241
   }, {
@@ -185,7 +185,7 @@
     "path" : "src\\utils\\scrum-markov-engine.ts",
     "modificationInfo" : {
       "contentHash" : -1228470496,
-      "lastModified" : 1758932302933
+      "lastModified" : 1758932830630
     },
     "linesOfCode" : 332
   }, {
@@ -199,14 +199,14 @@
     "path" : "src\\utils\\storage.ts",
     "modificationInfo" : {
       "contentHash" : 555275630,
-      "lastModified" : 1758932344550
+      "lastModified" : 1758932830630
     },
     "linesOfCode" : 250
   }, {
     "path" : "src\\utils\\tools-integration.ts",
     "modificationInfo" : {
       "contentHash" : 491542313,
-      "lastModified" : 1758932167875
+      "lastModified" : 1758932830630
     },
     "linesOfCode" : 298
   }, {

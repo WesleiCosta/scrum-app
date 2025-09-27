@@ -257,6 +257,44 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  // Função para obter cores da matriz de transição baseadas no percentual e significado
+  const getCoresMatrizTransicao = (fromState: UnifiedState, toState: UnifiedState, probability: number) => {
+    const intensity = Math.min(probability * 1.2, 1); // Amplifica um pouco para melhor visibilidade
+    
+    // Determinar se a transição é positiva, neutra ou negativa
+    const stateOrder = { 'Saudável': 0, 'Em Risco': 1, 'Crítico': 2 };
+    const fromOrder = stateOrder[fromState];
+    const toOrder = stateOrder[toState];
+    
+    let baseColor: string;
+    let textColor = 'text-gray-900';
+    
+    if (fromOrder === toOrder) {
+      // Transição para o mesmo estado (estabilidade)
+      if (fromState === 'Saudável') {
+        baseColor = `rgba(34, 197, 94, ${0.2 + intensity * 0.6})`; // Verde para estabilidade boa
+      } else if (fromState === 'Em Risco') {
+        baseColor = `rgba(251, 191, 36, ${0.2 + intensity * 0.6})`; // Amarelo para estabilidade média
+      } else {
+        baseColor = `rgba(239, 68, 68, ${0.2 + intensity * 0.6})`; // Vermelho para estabilidade ruim
+      }
+    } else if (toOrder < fromOrder) {
+      // Transição positiva (melhoria)
+      baseColor = `rgba(34, 197, 94, ${0.3 + intensity * 0.7})`; // Verde para melhoria
+      textColor = intensity > 0.5 ? 'text-white font-semibold' : 'text-green-900 font-medium';
+    } else {
+      // Transição negativa (degradação)
+      baseColor = `rgba(239, 68, 68, ${0.3 + intensity * 0.7})`; // Vermelho para degradação
+      textColor = intensity > 0.5 ? 'text-white font-semibold' : 'text-red-900 font-medium';
+    }
+    
+    return {
+      backgroundColor: baseColor,
+      textColor: textColor,
+      borderColor: intensity > 0.4 ? 'border-gray-400' : 'border-gray-300'
+    };
+  };
+
   if (!currentProject) {
     return (
       <div className="text-center py-12">
@@ -583,32 +621,104 @@ const DashboardPage: React.FC = () => {
             
             {/* Matriz de Transição */}
             <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">🔢 Matriz de Transição</h2>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">🔢 Matriz de Transição</h2>
+                  <p className="text-sm text-gray-600">
+                    Probabilidades de transição entre estados baseada nos últimos {windowSize} sprints
+                  </p>
+                </div>
+                
+                {/* Legenda de Cores */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Legenda:</h4>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(34, 197, 94, 0.7)' }}></div>
+                      <span>Melhoria/Estabilidade Positiva</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}></div>
+                      <span>Manutenção do Estado</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(239, 68, 68, 0.7)' }}></div>
+                      <span>Degradação/Risco</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-gray-300 shadow-sm">
                   <thead>
-                    <tr>
-                      <th className="border border-gray-300 p-3 bg-gray-100">De ↓ / Para →</th>
+                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+                      <th className="border border-gray-300 p-4 bg-gray-200 font-bold text-gray-800">
+                        <div className="flex flex-col items-center">
+                          <span>De ↓ / Para →</span>
+                          <span className="text-xs text-gray-600 mt-1">Probabilidade (%)</span>
+                        </div>
+                      </th>
                       {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map(estado => (
-                        <th key={estado} className={`border border-gray-300 p-3 ${getCoresEstado(estado).bg}`}>
-                          {estado}
+                        <th key={estado} className={`border border-gray-300 p-4 ${getCoresEstado(estado).bg} ${getCoresEstado(estado).text}`}>
+                          <div className="flex flex-col items-center">
+                            <span className="flex items-center">
+                              {getCoresEstado(estado).icon} {estado}
+                            </span>
+                          </div>
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
-                      <tr key={fromState}>
-                        <td className={`border border-gray-300 p-3 font-semibold ${getCoresEstado(fromState).bg}`}>
-                          {fromState}
+                      <tr key={fromState} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className={`border border-gray-300 p-4 font-bold ${getCoresEstado(fromState).bg} ${getCoresEstado(fromState).text}`}>
+                          <div className="flex items-center justify-center">
+                            <span className="mr-2">{getCoresEstado(fromState).icon}</span>
+                            {fromState}
+                          </div>
                         </td>
-                        {matrizTransicao[i].map((value, j) => (
-                          <td key={j} className="border border-gray-300 p-3 text-center"
-                              style={{ backgroundColor: `rgba(59, 130, 246, ${value * 0.7})` }}>
-                            {formatarProbabilidade(value)}
-                          </td>
-                        ))}
+                        {matrizTransicao[i].map((value, j) => {
+                          const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
+                          const cores = getCoresMatrizTransicao(fromState, toState, value);
+                          
+                          return (
+                            <td 
+                              key={j} 
+                              className={`border ${cores.borderColor} p-4 text-center ${cores.textColor} transition-all duration-200 hover:scale-105 hover:shadow-lg cursor-help relative group`}
+                              style={{ backgroundColor: cores.backgroundColor }}
+                              title={`${fromState} → ${toState}: ${formatarProbabilidade(value)} ${
+                                fromState === toState ? '(Estabilidade)' : 
+                                (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? '(Melhoria)' : '(Degradação)'
+                              }`}
+                            >
+                              <div className="flex flex-col items-center">
+                                <span className="text-xl font-bold">{formatarProbabilidade(value)}</span>
+                                {value > 0.05 && (
+                                  <span className="text-xs mt-1 opacity-75 font-medium">
+                                    {value > 0.7 ? 'Alta' : value > 0.3 ? 'Média' : 'Baixa'}
+                                  </span>
+                                )}
+                                {value < 0.01 && value > 0 && (
+                                  <span className="text-xs mt-1 opacity-50">Rara</span>
+                                )}
+                              </div>
+                              
+                              {/* Tooltip hover - aparece apenas em valores significativos */}
+                              {value > 0.1 && (
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                                  {fromState === toState ? 
+                                    `Mantém ${fromState.toLowerCase()}` : 
+                                    (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(toState) < (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).indexOf(fromState) ? 
+                                    'Melhoria do projeto' : 
+                                    'Degradação do projeto'
+                                  }
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -774,26 +884,36 @@ const DashboardPage: React.FC = () => {
                   {/* Editor de Matriz */}
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-4">Editar Matriz de Transição Hipotética</h4>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
                         <div key={fromState} className="flex items-center space-x-2">
-                          <div className={`w-20 text-sm font-medium p-2 rounded ${getCoresEstado(fromState).bg}`}>
+                          <div className={`w-24 text-sm font-medium p-2 rounded ${getCoresEstado(fromState).bg} ${getCoresEstado(fromState).text}`}>
                             {fromState}
                           </div>
-                          <span className="text-gray-400">→</span>
-                          {(whatIfMatrix || matrizTransicao)[i].map((value, j) => (
-                            <input
-                              key={j}
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={Math.round(value * 100)}
-                              onChange={(e) => editarMatrizWhatIfDebounced(i, j, e.target.value)}
-                              className="w-16 p-1 border rounded text-center text-sm"
-                            />
-                          ))}
-                          <span className="text-xs text-gray-500">%</span>
+                          <span className="text-gray-400 text-lg">→</span>
+                          {(whatIfMatrix || matrizTransicao)[i].map((value, j) => {
+                            const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
+                            const cores = getCoresMatrizTransicao(fromState, toState, value);
+                            
+                            return (
+                              <div key={j} className="relative">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  value={Math.round(value * 100)}
+                                  onChange={(e) => editarMatrizWhatIfDebounced(i, j, e.target.value)}
+                                  className={`w-18 p-2 border-2 ${cores.borderColor} rounded text-center text-sm font-semibold focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all`}
+                                  style={{ backgroundColor: cores.backgroundColor, color: cores.textColor.includes('text-white') ? 'white' : 'inherit' }}
+                                />
+                                <div className="absolute -bottom-5 left-0 right-0 text-center">
+                                  <span className="text-xs text-gray-400">{toState.slice(0, 3)}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <span className="text-xs text-gray-500 ml-2">%</span>
                         </div>
                       ))}
                     </div>
