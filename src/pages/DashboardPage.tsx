@@ -293,193 +293,274 @@ const DashboardPage: React.FC = () => {
 
         {/* Dashboard Executivo */}
         {selectedDashboard === 'executive' && (
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            {/* Medidor de Saúde */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">🎯 Estado de Saúde Unificado</h2>
+            {/* Coluna Principal Esquerda */}
+            <div className="lg:col-span-8 space-y-6">
               
-              <div className="flex justify-center mb-6">
-                <div className={`w-56 h-56 rounded-full border-8 flex items-center justify-center ${getCoresEstado(estadoAtual).bg} ${getCoresEstado(estadoAtual).border}`}>
-                  <div className="text-center">
-                    <div className="text-5xl mb-3">{getCoresEstado(estadoAtual).icon}</div>
-                    <div className={`text-2xl font-bold ${getCoresEstado(estadoAtual).text}`}>{estadoAtual}</div>
+              {/* Header do Status com Medidor e KPIs Integrados */}
+              <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 p-6 rounded-2xl shadow-xl border border-blue-200">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  
+                  {/* Medidor Central */}
+                  <div className="md:col-span-1 flex justify-center">
+                    <div className="relative">
+                      <div className={`w-40 h-40 rounded-full border-6 flex items-center justify-center ${getCoresEstado(estadoAtual).bg} ${getCoresEstado(estadoAtual).border} shadow-inner`}>
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">{getCoresEstado(estadoAtual).icon}</div>
+                          <div className={`text-lg font-bold ${getCoresEstado(estadoAtual).text}`}>{estadoAtual}</div>
+                        </div>
+                      </div>
+                      <div className="absolute -top-3 -right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-bold">
+                        Sprint {sprintLogs.length}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KPIs Compactos */}
+                  <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                    <div className="bg-white/70 p-4 rounded-xl border border-green-200 backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">
+                            {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Saudável').length / Math.max(historicoEstados.length, 1)) * 100)}%
+                          </div>
+                          <div className="text-xs text-gray-600 font-medium">Taxa Saudável</div>
+                        </div>
+                        <div className="text-2xl">🟢</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-xl border border-yellow-200 backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-yellow-600">
+                            {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Em Risco').length / Math.max(historicoEstados.length, 1)) * 100)}%
+                          </div>
+                          <div className="text-xs text-gray-600 font-medium">Taxa Risco</div>
+                        </div>
+                        <div className="text-2xl">🟡</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-xl border border-red-200 backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-red-600">
+                            {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Crítico').length / Math.max(historicoEstados.length, 1)) * 100)}%
+                          </div>
+                          <div className="text-xs text-gray-600 font-medium">Taxa Crítica</div>
+                        </div>
+                        <div className="text-2xl">🔴</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-xl border border-blue-200 backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">{historicoEstados.length}</div>
+                          <div className="text-xs text-gray-600 font-medium">Total Sprints</div>
+                        </div>
+                        <div className="text-2xl">📊</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <p className="text-center text-gray-600">
-                Sprint atual: {sprintLogs.length} | Baseado em {historicoEstados.length} sprints
-              </p>
-            </div>
 
-            {/* KPIs */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">📊 Indicadores-Chave</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">{sprintLogs.length}</div>
-                  <div className="text-sm text-gray-600">Sprints Total</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">
-                    {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Saudável').length / Math.max(historicoEstados.length, 1)) * 100)}%
-                  </div>
-                  <div className="text-sm text-gray-600">Taxa Saudável</div>
-                </div>
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <div className="text-3xl font-bold text-yellow-600">
-                    {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Em Risco').length / Math.max(historicoEstados.length, 1)) * 100)}%
-                  </div>
-                  <div className="text-sm text-gray-600">Taxa Risco</div>
-                </div>
-                <div className="text-center p-4 bg-red-50 rounded-lg">
-                  <div className="text-3xl font-bold text-red-600">
-                    {Math.round((historicoEstados.filter((e: UnifiedState) => e === 'Crítico').length / Math.max(historicoEstados.length, 1)) * 100)}%
-                  </div>
-                  <div className="text-sm text-gray-600">Taxa Crítica</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Análise Inteligente e Sugestões */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">🧠 Análise Inteligente & Plano de Ação</h3>
-              
-              {/* Análise do Estado Atual */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                  🔍 Análise Inteligente do Momento Atual
-                  <span className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
-                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-200 text-red-800' :
-                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-200 text-yellow-800' :
-                    'bg-green-200 text-green-800'
+              {/* Análise Inteligente Compacta */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                    🧠 Diagnóstico Inteligente
+                  </h3>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100 text-red-800 border border-red-300' :
+                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                    'bg-green-100 text-green-800 border border-green-300'
                   }`}>
-                    {analisarSituacaoAtual.urgencia.toUpperCase()}
+                    PRIORIDADE {analisarSituacaoAtual.urgencia.toUpperCase()}
                   </span>
-                </h4>
-                <div className="space-y-3 text-gray-700">
-                  <div className="bg-white p-3 rounded border-l-4 border-blue-500">
-                    <p><strong>Situação:</strong> {analisarSituacaoAtual.situacao}</p>
-                    <p className="text-sm mt-1 text-gray-600">{analisarSituacaoAtual.contexto}</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border-l-4 border-blue-500">
+                      <div className="font-bold text-blue-900 mb-1">Situação Detectada</div>
+                      <div className="text-blue-800 font-semibold">{analisarSituacaoAtual.situacao}</div>
+                      <div className="text-sm text-blue-600 mt-2">{analisarSituacaoAtual.contexto}</div>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <div className="font-bold text-green-800">Saudável</div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {Math.round(analisarSituacaoAtual.taxas.geral.saudavel * 100)}%
-                      </div>
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border-l-4 border-purple-500">
+                      <div className="font-bold text-purple-900 mb-2">💡 Insights da IA</div>
+                      <ul className="text-sm text-purple-700 space-y-1">
+                        {analisarSituacaoAtual.insights.slice(0, 2).map((insight, index) => (
+                          <li key={index} className="flex items-start">
+                            <span className="text-purple-500 mr-2">•</span>
+                            <span>{insight}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="bg-yellow-50 p-3 rounded-lg">
-                      <div className="font-bold text-yellow-800">Em Risco</div>
-                      <div className="text-2xl font-bold text-yellow-600">
-                        {Math.round(analisarSituacaoAtual.taxas.geral.risco * 100)}%
-                      </div>
-                    </div>
-                    <div className="bg-red-50 p-3 rounded-lg">
-                      <div className="font-bold text-red-800">Crítico</div>
-                      <div className="text-2xl font-bold text-red-600">
-                        {Math.round(analisarSituacaoAtual.taxas.geral.critico * 100)}%
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <h5 className="font-bold text-blue-800 mb-2">💡 Insights da IA:</h5>
-                    <ul className="list-disc pl-5 space-y-1 text-blue-700 text-sm">
-                      {analisarSituacaoAtual.insights.map((insight, index) => (
-                        <li key={index}>{insight}</li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Plano de Ação Inteligente */}
-              <div className={`p-4 border-l-4 rounded-r-lg ${
-                analisarSituacaoAtual.urgencia === 'alta' ? 'border-red-500 bg-red-50' :
-                analisarSituacaoAtual.urgencia === 'media' ? 'border-yellow-500 bg-yellow-50' :
-                'border-green-500 bg-green-50'
+            {/* Coluna Lateral Direita */}
+            <div className="lg:col-span-4 space-y-6">
+              
+              {/* Previsão da Próxima Sprint */}
+              {previsoes.length > 0 && (
+                <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-6 rounded-2xl shadow-xl text-white">
+                  <h4 className="text-lg font-bold mb-4 flex items-center">
+                    🔮 Previsão Próxima Sprint
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center">
+                          <span className="text-green-300 mr-2">●</span>
+                          Saudável
+                        </span>
+                        <span className="font-bold text-xl">
+                          {Math.round(previsoes[0].probabilities[0] * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center">
+                          <span className="text-yellow-300 mr-2">●</span>
+                          Em Risco
+                        </span>
+                        <span className="font-bold text-xl">
+                          {Math.round(previsoes[0].probabilities[1] * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center">
+                          <span className="text-red-300 mr-2">●</span>
+                          Crítico
+                        </span>
+                        <span className="font-bold text-xl">
+                          {Math.round(previsoes[0].probabilities[2] * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {previsoes[0].probabilities[2] > 0.4 && (
+                    <div className="mt-4 p-3 bg-red-500/30 rounded-lg border border-red-300">
+                      <p className="text-red-100 text-sm font-medium">
+                        ⚠️ Alto risco detectado - Ações preventivas recomendadas
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Métricas de Acompanhamento */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <h5 className="font-bold text-gray-800 mb-4 flex items-center">
+                  📈 Indicadores Críticos
+                </h5>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">• Velocity da equipe</span>
+                    <span className="text-blue-600 font-medium">Monitorar</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">• Burn-down da sprint</span>
+                    <span className="text-green-600 font-medium">OK</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">• Impedimentos</span>
+                    <span className="text-orange-600 font-medium">Atenção</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">• Qualidade entregas</span>
+                    <span className="text-blue-600 font-medium">Avaliar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Plano de Ação - Largura Total */}
+            <div className="lg:col-span-12">
+              <div className={`p-6 rounded-2xl shadow-xl border-2 ${
+                analisarSituacaoAtual.urgencia === 'alta' ? 'border-red-300 bg-gradient-to-br from-red-50 to-red-100' :
+                analisarSituacaoAtual.urgencia === 'media' ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-100' :
+                'border-green-300 bg-gradient-to-br from-green-50 to-emerald-100'
               }`}>
-                <h4 className={`text-lg font-semibold mb-4 flex items-center ${
+                <h4 className={`text-xl font-bold mb-4 flex items-center ${
                   analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
                   analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
                   'text-green-800'
                 }`}>
-                  🎯 Plano de Ação Inteligente
+                  🎯 Plano de Ação Estratégico
                   {analisarSituacaoAtual.urgencia === 'alta' && <span className="ml-2 animate-pulse">🚨</span>}
                 </h4>
                 
-                <div className="space-y-4">
-                  {/* Ações Específicas da IA */}
-                  <div className={`p-3 rounded-lg ${
-                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100' :
-                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100' :
-                    'bg-green-100'
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`p-4 rounded-xl border-2 ${
+                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100/50 border-red-200' :
+                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100/50 border-yellow-200' :
+                    'bg-green-100/50 border-green-200'
                   }`}>
-                    <h5 className={`font-bold mb-2 ${
+                    <h5 className={`font-bold mb-3 flex items-center ${
                       analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
                       analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
                       'text-green-800'
                     }`}>
-                      {analisarSituacaoAtual.urgencia === 'alta' ? '🚨 AÇÕES CRÍTICAS' :
+                      {analisarSituacaoAtual.urgencia === 'alta' ? '🚨 AÇÕES IMEDIATAS' :
                        analisarSituacaoAtual.urgencia === 'media' ? '⚠️ AÇÕES PREVENTIVAS' :
-                       '✅ AÇÕES DE MELHORIA'}
+                       '✅ AÇÕES DE OTIMIZAÇÃO'}
                     </h5>
-                    <ul className={`list-disc pl-5 space-y-1 ${
+                    <ul className={`space-y-2 ${
                       analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-700' :
                       analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-700' :
                       'text-green-700'
                     }`}>
                       {analisarSituacaoAtual.acoes.map((acao, index) => (
-                        <li key={index}>{acao}</li>
+                        <li key={index} className="flex items-start">
+                          <span className={`mr-3 mt-1 ${
+                            analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-500' :
+                            analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-500' :
+                            'text-green-500'
+                          }`}>
+                            {index < 3 ? '🔥' : '📋'}
+                          </span>
+                          <span className="text-sm font-medium">{acao}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
-
-                  {/* Previsão Preditiva */}
-                  {previsoes.length > 0 && (
-                    <div className="bg-blue-100 p-3 rounded-lg">
-                      <h5 className="font-bold text-blue-800 mb-2">🔮 Previsão Próxima Sprint</h5>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div className="text-center">
-                          <div className="text-green-600 font-bold">
-                            {Math.round(previsoes[0].probabilities[0] * 100)}%
-                          </div>
-                          <div className="text-gray-600">Saudável</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-yellow-600 font-bold">
-                            {Math.round(previsoes[0].probabilities[1] * 100)}%
-                          </div>
-                          <div className="text-gray-600">Em Risco</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-red-600 font-bold">
-                            {Math.round(previsoes[0].probabilities[2] * 100)}%
-                          </div>
-                          <div className="text-gray-600">Crítico</div>
-                        </div>
+                  
+                  <div className="bg-white/70 p-4 rounded-xl border-2 border-gray-200 backdrop-blur-sm">
+                    <h5 className="font-bold text-gray-800 mb-3 flex items-center">
+                      🎯 Próximos Passos
+                    </h5>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center p-2 bg-blue-50 rounded-lg border border-blue-200">
+                        <span className="text-blue-600 mr-3">1️⃣</span>
+                        <span className="text-blue-800 font-medium">Implementar ações críticas</span>
                       </div>
-                      {previsoes[0].probabilities[2] > 0.4 && (
-                        <p className="text-red-700 text-sm mt-2 font-medium">
-                          ⚠️ Alto risco de estado crítico - Reforce medidas preventivas
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Métricas de Acompanhamento */}
-                  <div className="bg-gray-100 p-3 rounded-lg">
-                    <h5 className="font-bold text-gray-800 mb-2">📊 Indicadores para Monitorar</h5>
-                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-700">
-                      <div>• Velocity da equipe</div>
-                      <div>• Burn-down da sprint</div>
-                      <div>• Número de impedimentos</div>
-                      <div>• Taxa de retrabalho</div>
-                      <div>• Satisfação da equipe</div>
-                      <div>• Qualidade das entregas</div>
+                      <div className="flex items-center p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <span className="text-purple-600 mr-3">2️⃣</span>
+                        <span className="text-purple-800 font-medium">Monitorar indicadores diários</span>
+                      </div>
+                      <div className="flex items-center p-2 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <span className="text-indigo-600 mr-3">3️⃣</span>
+                        <span className="text-indigo-800 font-medium">Avaliar eficácia em 2-3 dias</span>
+                      </div>
                     </div>
                   </div>
                 </div>

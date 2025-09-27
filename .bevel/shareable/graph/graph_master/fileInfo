@@ -72,10 +72,10 @@
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
-      "contentHash" : -1240498837,
-      "lastModified" : 1758931080702
+      "contentHash" : -1136732609,
+      "lastModified" : 1758931433006
     },
-    "linesOfCode" : 849
+    "linesOfCode" : 930
   }, {
     "path" : "src\\pages\\LoginPage.tsx",
     "modificationInfo" : {
@@ -101,7 +101,7 @@
     "path" : "src\\pages\\SprintLogPage.tsx",
     "modificationInfo" : {
       "contentHash" : -564967706,
-      "lastModified" : 1758929913165
+      "lastModified" : 1758931197837
     },
     "linesOfCode" : 517
   }, {
@@ -209,27 +209,6 @@
       "lastModified" : 1758887649001
     },
     "linesOfCode" : 42
-  }, {
-    "path" : "test-fixed-ranges.js",
-    "modificationInfo" : {
-      "contentHash" : 2058000987,
-      "lastModified" : 1758929084317
-    },
-    "linesOfCode" : 136
-  }, {
-    "path" : "test-state-mapping.js",
-    "modificationInfo" : {
-      "contentHash" : 1405947205,
-      "lastModified" : 1758929943106
-    },
-    "linesOfCode" : 85
-  }, {
-    "path" : "test-zero-values.js",
-    "modificationInfo" : {
-      "contentHash" : -1485697663,
-      "lastModified" : 1758929026194
-    },
-    "linesOfCode" : 133
   }, {
     "path" : "vite.config.ts",
     "modificationInfo" : {
