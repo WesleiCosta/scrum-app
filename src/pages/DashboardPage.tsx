@@ -183,16 +183,16 @@ const DashboardPage: React.FC = () => {
       ? converterParaEstadoUnificado(sprintLogs[sprintLogs.length - 1].finalState) 
       : 'Em Risco';
     
-    // Usar parâmetro N do projeto ou default 10
+    // Usar parâmetro N (janela deslizante) do projeto ou padrão científico 10
     const windowSize = currentProject?.nValue || 10;
     
     const matrizTransicao: TransitionMatrix = historicoEstados.length >= 2 
       ? ScrumMarkovEngine.calculateDynamicTransitionMatrix(historicoEstados, windowSize)
       : [[1/3, 1/3, 1/3], [1/3, 1/3, 1/3], [1/3, 1/3, 1/3]];
 
-    // Gerar previsões para as próximas 8 sprints
+    // Gerar previsões para as próximas N sprints (baseado no windowSize)
     const previsoes: StatePrediction[] = historicoEstados.length >= 1
-      ? ScrumMarkovEngine.generateFuturePredictions(estadoAtual, matrizTransicao, 8)
+      ? ScrumMarkovEngine.generateFuturePredictions(estadoAtual, matrizTransicao, windowSize)
       : [];
 
     return {
@@ -202,7 +202,7 @@ const DashboardPage: React.FC = () => {
       previsoes,
       windowSize
     };
-  }, [sprintLogs.length, currentProject?.nValue, sprintLogs.slice(-10)]);  // Otimização: dependencies específicas
+  }, [sprintLogs.length, currentProject?.nValue, sprintLogs]);  // Otimização: dependencies específicas
 
   const { historicoEstados, estadoAtual, matrizTransicao, previsoes, windowSize } = dadosComputados;
 
@@ -964,293 +964,562 @@ const DashboardPage: React.FC = () => {
 
         {/* Dashboard Preditivo */}
         {selectedDashboard === 'predictive' && (
-          <div className="space-y-8">
+          <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
             
-            {/* Controles do Dashboard Preditivo */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">� Dashboard Preditivo Avançado</h2>
-                <button
-                  onClick={() => setShowWhatIfAnalysis(!showWhatIfAnalysis)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    showWhatIfAnalysis 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {showWhatIfAnalysis ? '📊 Voltar Análise Padrão' : '🧪 Análise What-If'}
-                </button>
-              </div>
-              
-              {/* Informações do Modelo */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{sprintLogs.length}</div>
-                  <div className="text-sm text-gray-600">Sprints Histórico</div>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{windowSize}</div>
-                  <div className="text-sm text-gray-600">Janela Deslizante (N)</div>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{previsoes.length}</div>
-                  <div className="text-sm text-gray-600">Previsões Geradas</div>
-                </div>
-                <div className={`text-center p-3 rounded-lg ${
-                  sprintLogs.length < 6 ? 'bg-red-50' :
-                  sprintLogs.length < 12 ? 'bg-yellow-50' : 'bg-green-50'
-                }`}>
-                  <div className={`text-2xl font-bold ${
-                    sprintLogs.length < 6 ? 'text-red-600' :
-                    sprintLogs.length < 12 ? 'text-yellow-600' : 'text-green-600'
-                  }`}>
-                    {sprintLogs.length < 6 ? 'Baixa' :
-                     sprintLogs.length < 12 ? 'Média' : 'Alta'}
+            {/* Header Futurista */}
+            <div className="bg-white/80 backdrop-blur-sm border-b border-violet-200 p-8 mb-8">
+              <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl">
+                        🔮
+                      </div>
+                      <div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-800 via-purple-800 to-indigo-800 bg-clip-text text-transparent">
+                          Insights Preditivos
+                        </h1>
+                        <p className="text-lg text-gray-600 mt-1">
+                          Análise de cenários futuros baseada em Cadeias de Markov
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Indicador de Precisão */}
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500"></div>
+                        <span className="text-gray-600">Fórmula: S<sub>t+k</sub> = S<sub>t</sub> × P<sup>k</sup></span>
+                      </div>
+                      <div className="w-1 h-4 bg-gray-300 rounded-full"></div>
+                      <span className={`font-semibold ${
+                        sprintLogs.length < 6 ? 'text-red-600' :
+                        sprintLogs.length < 12 ? 'text-amber-600' : 'text-emerald-600'
+                      }`}>
+                        Confiança: {sprintLogs.length < 6 ? 'Baixa' : sprintLogs.length < 12 ? 'Média' : 'Alta'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Confiança Modelo</div>
+                  
+                  {/* Controle What-If Redesenhado */}
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-2 border border-violet-200">
+                      <button
+                        onClick={() => setShowWhatIfAnalysis(!showWhatIfAnalysis)}
+                        className={`
+                          px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3
+                          ${showWhatIfAnalysis 
+                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-300' 
+                            : 'bg-white text-violet-700 hover:bg-violet-50 border border-violet-200'
+                          }
+                        `}
+                      >
+                        <span className="text-lg">
+                          {showWhatIfAnalysis ? '📊' : '🧪'}
+                        </span>
+                        <span>
+                          {showWhatIfAnalysis ? 'Análise Padrão' : 'Cenários What-If'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Métricas do Modelo */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-blue-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-lg">
+                        📊
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold text-blue-700">{sprintLogs.length}</div>
+                        <div className="text-xs font-medium text-blue-600 uppercase tracking-wider">Sprints</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600">Dados Históricos</div>
+                  </div>
+                  
+                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-lg">
+                        🎯
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold text-emerald-700">{windowSize}</div>
+                        <div className="text-xs font-medium text-emerald-600 uppercase tracking-wider">Janela</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600">Tamanho da Amostra</div>
+                  </div>
+                  
+                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-violet-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-lg">
+                        🔮
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold text-violet-700">{previsoes.length}</div>
+                        <div className="text-xs font-medium text-violet-600 uppercase tracking-wider">Previsões</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600">Cenários Futuros</div>
+                  </div>
+                  
+                  <div className={`bg-white/70 backdrop-blur-sm rounded-2xl p-6 border ${
+                    sprintLogs.length < 6 ? 'border-red-200' :
+                    sprintLogs.length < 12 ? 'border-amber-200' : 'border-emerald-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg ${
+                        sprintLogs.length < 6 ? 'bg-gradient-to-br from-red-500 to-rose-500' :
+                        sprintLogs.length < 12 ? 'bg-gradient-to-br from-amber-500 to-orange-500' :
+                        'bg-gradient-to-br from-emerald-500 to-green-500'
+                      }`}>
+                        {sprintLogs.length < 6 ? '⚠️' : sprintLogs.length < 12 ? '📈' : '✅'}
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-2xl font-bold ${
+                          sprintLogs.length < 6 ? 'text-red-700' :
+                          sprintLogs.length < 12 ? 'text-amber-700' : 'text-emerald-700'
+                        }`}>
+                          {sprintLogs.length < 6 ? 'Baixa' :
+                           sprintLogs.length < 12 ? 'Média' : 'Alta'}
+                        </div>
+                        <div className={`text-xs font-medium uppercase tracking-wider ${
+                          sprintLogs.length < 6 ? 'text-red-600' :
+                          sprintLogs.length < 12 ? 'text-amber-600' : 'text-emerald-600'
+                        }`}>
+                          Precisão
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600">Confiança Modelo</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Previsões de Estados Futuros */}
-            {previsoes.length > 0 && (
-              <div className="bg-white p-6 rounded-xl shadow-lg border">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">📈 Previsões Multi-Passo (S<sub>t+k</sub> = S<sub>t</sub> × P<sup>k</sup>)</h3>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr>
-                        <th className="border border-gray-300 p-3 bg-gray-100">Sprint Futura</th>
-                        <th className="border border-gray-300 p-3 bg-green-50">P(Saudável)</th>
-                        <th className="border border-gray-300 p-3 bg-yellow-50">P(Em Risco)</th>
-                        <th className="border border-gray-300 p-3 bg-red-50">P(Crítico)</th>
-                        <th className="border border-gray-300 p-3 bg-gray-100">Confiança</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previsoes.slice(0, 5).map((predicao) => {
-                        const sprintNumber = sprintLogs.length + predicao.step;
-                        return (
-                          <tr key={predicao.step}>
-                            <td className="border border-gray-300 p-3 font-semibold text-center">
-                              Sprint {sprintNumber}
-                            </td>
-                            <td className="border border-gray-300 p-3 text-center">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div 
-                                  className="w-16 h-4 bg-green-200 rounded"
-                                  style={{ width: `${predicao.probabilities[0] * 64}px` }}
-                                />
-                                <span className="font-medium">{formatarProbabilidade(predicao.probabilities[0])}</span>
-                              </div>
-                            </td>
-                            <td className="border border-gray-300 p-3 text-center">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div 
-                                  className="w-16 h-4 bg-yellow-200 rounded"
-                                  style={{ width: `${predicao.probabilities[1] * 64}px` }}
-                                />
-                                <span className="font-medium">{formatarProbabilidade(predicao.probabilities[1])}</span>
-                              </div>
-                            </td>
-                            <td className="border border-gray-300 p-3 text-center">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div 
-                                  className="w-16 h-4 bg-red-200 rounded"
-                                  style={{ width: `${predicao.probabilities[2] * 64}px` }}
-                                />
-                                <span className="font-medium">{formatarProbabilidade(predicao.probabilities[2])}</span>
-                              </div>
-                            </td>
-                            <td className={`border border-gray-300 p-3 text-center font-medium ${
-                              predicao.confidence === 'Alta' ? 'text-green-600' :
-                              predicao.confidence === 'Média' ? 'text-yellow-600' : 'text-red-600'
-                            }`}>
-                              {predicao.confidence}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+            <div className="max-w-7xl mx-auto px-8 space-y-8">
 
-            {/* Módulo What-If Analysis */}
-            {showWhatIfAnalysis && (
-              <div className="bg-white p-6 rounded-xl shadow-lg border">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">🧪 Análise de Cenários "What-If"</h3>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  
-                  {/* Editor de Matriz */}
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-4">Editar Matriz de Transição Hipotética</h4>
-                    <div className="space-y-3">
-                      {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
-                        <div key={fromState} className="flex items-center space-x-2">
-                          <div className={`w-24 text-sm font-medium p-2 rounded ${getCoresEstado(fromState).bg} ${getCoresEstado(fromState).text}`}>
-                            {fromState}
-                          </div>
-                          <span className="text-gray-400 text-lg">→</span>
-                          {(whatIfMatrix || matrizTransicao)[i].map((value, j) => {
-                            const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
-                            const cores = getCoresMatrizTransicao(fromState, toState, value);
-                            
-                            return (
-                              <div key={j} className="relative">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="1"
-                                  value={Math.round(value * 100)}
-                                  onChange={(e) => editarMatrizWhatIfDebounced(i, j, e.target.value)}
-                                  className={`w-18 p-2 border-2 ${cores.borderColor} rounded text-center text-sm font-semibold focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all`}
-                                  style={{ backgroundColor: cores.backgroundColor, color: cores.textColor.includes('text-white') ? 'white' : 'inherit' }}
-                                />
-                                <div className="absolute -bottom-5 left-0 right-0 text-center">
-                                  <span className="text-xs text-gray-400">{toState.slice(0, 3)}</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                          <span className="text-xs text-gray-500 ml-2">%</span>
-                        </div>
-                      ))}
+              {/* Previsões de Estados Futuros Redesenhadas */}
+              {previsoes.length > 0 && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-violet-200/50 p-8">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl flex items-center justify-center text-white text-xl">
+                      📈
                     </div>
-                    
-                    <div className="mt-4 flex space-x-2">
-                      <button
-                        onClick={() => setWhatIfMatrix(matrizTransicao.map(row => [...row]))}
-                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
-                      >
-                        Resetar
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (whatIfMatrix) {
-                            const normalized = ScrumMarkovEngine.normalizeMatrix(whatIfMatrix);
-                            setWhatIfMatrix(normalized);
-                          }
-                        }}
-                        className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                      >
-                        Normalizar
-                      </button>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-800">Linha Temporal Preditiva</h3>
+                      <p className="text-gray-600">Evolução probabilística dos próximos {previsoes.length} sprints</p>
                     </div>
                   </div>
-
-                  {/* Comparação de Resultados */}
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-4">Impacto do Cenário</h4>
-                    {analiseComparativa && (
-                      <div className="space-y-4">
-                        <div className="text-sm text-gray-600 mb-3">
-                          Comparando previsões: <strong>Cenário Base</strong> vs <strong>Cenário Hipotético</strong>
-                        </div>
-                        
-                        {analiseComparativa.scenario.slice(0, 3).map((cenario, index) => {
-                          const base = analiseComparativa.base[index];
-                          const sprintNum = sprintLogs.length + cenario.step;
+                  
+                  {/* Timeline de Previsões */}
+                  <div className="space-y-6">
+                    {previsoes.slice(0, 5).map((predicao, index) => {
+                      const sprintNumber = sprintLogs.length + predicao.step;
+                      const maxProb = Math.max(...predicao.probabilities);
+                      const dominantStateIndex = predicao.probabilities.indexOf(maxProb);
+                      const dominantState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[dominantStateIndex];
+                      
+                      return (
+                        <div key={predicao.step} className="relative">
+                          {/* Timeline Line */}
+                          {index < previsoes.slice(0, 5).length - 1 && (
+                            <div className="absolute left-8 top-20 w-0.5 h-16 bg-gradient-to-b from-violet-300 to-purple-300"></div>
+                          )}
                           
-                          return (
-                            <div key={index} className="border border-gray-200 rounded-lg p-3">
-                              <div className="font-medium mb-2">Sprint {sprintNum}</div>
+                          <div className="flex items-start gap-6">
+                            {/* Timeline Marker */}
+                            <div className={`
+                              w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-lg
+                              ${dominantStateIndex === 0 ? 'bg-gradient-to-br from-emerald-500 to-green-500' :
+                                dominantStateIndex === 1 ? 'bg-gradient-to-br from-amber-500 to-orange-500' :
+                                'bg-gradient-to-br from-red-500 to-rose-500'}
+                              shadow-lg transform transition-transform hover:scale-110
+                            `}>
+                              {predicao.step}
+                            </div>
+                            
+                            {/* Prediction Card */}
+                            <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300">
+                              <div className="flex justify-between items-start mb-4">
+                                <div>
+                                  <h4 className="text-xl font-bold text-gray-800">Sprint {sprintNumber}</h4>
+                                  <div className={`text-sm font-semibold ${
+                                    predicao.confidence === 'Alta' ? 'text-emerald-600' :
+                                    predicao.confidence === 'Média' ? 'text-amber-600' : 'text-red-600'
+                                  }`}>
+                                    Estado Provável: {dominantState} ({formatarProbabilidade(maxProb)})
+                                  </div>
+                                </div>
+                                <div className={`
+                                  px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                                  ${predicao.confidence === 'Alta' ? 'bg-emerald-100 text-emerald-700' :
+                                    predicao.confidence === 'Média' ? 'bg-amber-100 text-amber-700' :
+                                    'bg-red-100 text-red-700'}
+                                `}>
+                                  {predicao.confidence}
+                                </div>
+                              </div>
                               
-                              {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((estado, stateIndex) => {
-                                const probBase = base.probabilities[stateIndex];
-                                const probCenario = cenario.probabilities[stateIndex];
-                                const diferenca = probCenario - probBase;
+                              {/* Barras de Probabilidade */}
+                              <div className="space-y-3">
+                                {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((estado, stateIndex) => {
+                                  const prob = predicao.probabilities[stateIndex];
+                                  const isMax = prob === maxProb;
+                                  
+                                  return (
+                                    <div key={estado} className="relative">
+                                      <div className="flex justify-between items-center mb-1">
+                                        <span className={`text-sm font-medium ${isMax ? 'font-bold' : ''}`}>
+                                          {getCoresEstado(estado).icon} {estado}
+                                        </span>
+                                        <span className={`text-sm font-bold ${
+                                          stateIndex === 0 ? 'text-emerald-600' :
+                                          stateIndex === 1 ? 'text-amber-600' : 'text-red-600'
+                                        }`}>
+                                          {formatarProbabilidade(prob)}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                                        <div 
+                                          className={`
+                                            h-full rounded-full transition-all duration-700 ease-out
+                                            ${stateIndex === 0 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' :
+                                              stateIndex === 1 ? 'bg-gradient-to-r from-amber-400 to-amber-600' :
+                                              'bg-gradient-to-r from-red-400 to-red-600'}
+                                            ${isMax ? 'shadow-lg ring-2 ring-white' : ''}
+                                          `}
+                                          style={{ 
+                                            width: `${Math.max(prob * 100, 2)}%`,
+                                            animationDelay: `${index * 200}ms`
+                                          }}
+                                        />
+                                        
+                                        {/* Pulse effect for dominant state */}
+                                        {isMax && (
+                                          <div className={`
+                                            absolute inset-0 rounded-full animate-pulse
+                                            ${stateIndex === 0 ? 'bg-emerald-400/20' :
+                                              stateIndex === 1 ? 'bg-amber-400/20' : 'bg-red-400/20'}
+                                          `} />
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Módulo What-If Analysis Redesenhado */}
+              {showWhatIfAnalysis && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-violet-200/50 p-8">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl">
+                      🧪
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-800">Laboratório de Cenários</h3>
+                      <p className="text-gray-600">Experimente diferentes matrizes de transição e veja o impacto</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    
+                    {/* Editor de Matriz Futurista */}
+                    <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-200">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center text-white">
+                          ⚙️
+                        </div>
+                        <h4 className="text-lg font-bold text-gray-800">Editor de Matriz Hipotética</h4>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((fromState, i) => (
+                          <div key={fromState} className="bg-white rounded-xl p-4 shadow-sm border border-violet-100">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className={`px-4 py-2 rounded-xl font-semibold ${getCoresEstado(fromState).bg} ${getCoresEstado(fromState).text} flex items-center gap-2`}>
+                                <span>{getCoresEstado(fromState).icon}</span>
+                                <span>{fromState}</span>
+                              </div>
+                              <div className="text-sm text-gray-500 font-medium">Transições para:</div>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-3">
+                              {(whatIfMatrix || matrizTransicao)[i].map((value, j) => {
+                                const toState = (['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[])[j];
+                                const cores = getCoresMatrizTransicao(fromState, toState, value);
                                 
                                 return (
-                                  <div key={estado} className="flex justify-between items-center text-sm">
-                                    <span>{estado}:</span>
-                                    <div className="flex items-center space-x-2">
-                                      <span>{formatarProbabilidade(probBase)}</span>
-                                      <span className="text-gray-400">→</span>
-                                      <span>{formatarProbabilidade(probCenario)}</span>
-                                      <span className={`font-medium ${
-                                        Math.abs(diferenca) < 0.01 ? 'text-gray-500' :
-                                        diferenca > 0 ? 'text-green-600' : 'text-red-600'
-                                      }`}>
-                                        ({diferenca > 0 ? '+' : ''}{formatarProbabilidade(diferenca)})
-                                      </span>
+                                  <div key={j} className="text-center">
+                                    <div className="text-xs font-medium text-gray-600 mb-1">
+                                      {getCoresEstado(toState).icon} {toState}
                                     </div>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={Math.round(value * 100)}
+                                      onChange={(e) => editarMatrizWhatIfDebounced(i, j, e.target.value)}
+                                      className={`
+                                        w-full p-3 border-2 rounded-xl text-center font-bold text-lg
+                                        focus:ring-4 focus:ring-violet-200 focus:border-violet-400 
+                                        transition-all duration-200 hover:scale-105
+                                        ${cores.borderColor}
+                                      `}
+                                      style={{ 
+                                        backgroundColor: cores.backgroundColor,
+                                        color: cores.textColor.includes('text-white') ? 'white' : 'inherit'
+                                      }}
+                                    />
+                                    <div className="text-xs text-gray-500 mt-1">%</div>
                                   </div>
                                 );
                               })}
                             </div>
-                          );
-                        })}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => setWhatIfMatrix(matrizTransicao.map(row => [...row]))}
+                          className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                          <span>🔄</span>
+                          <span>Resetar</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (whatIfMatrix) {
+                              const normalized = ScrumMarkovEngine.normalizeMatrix(whatIfMatrix);
+                              setWhatIfMatrix(normalized);
+                            }
+                          }}
+                          className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:from-violet-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+                        >
+                          <span>✨</span>
+                          <span>Normalizar</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Comparação de Resultados Redesenhada */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white">
+                          📊
+                        </div>
+                        <h4 className="text-lg font-bold text-gray-800">Análise Comparativa</h4>
+                      </div>
+                      
+                      {analiseComparativa ? (
+                        <div className="space-y-4">
+                          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-blue-100">
+                            <div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                              <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+                              Cenário Base vs
+                              <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
+                              Cenário Hipotético
+                            </div>
+                          </div>
+                          
+                          {analiseComparativa.scenario.slice(0, 3).map((cenario, index) => {
+                            const base = analiseComparativa.base[index];
+                            const sprintNum = sprintLogs.length + cenario.step;
+                            
+                            return (
+                              <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
+                                <div className="flex items-center justify-between mb-4">
+                                  <h5 className="font-bold text-gray-800">Sprint {sprintNum}</h5>
+                                  <div className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+                                    Passo {index + 1}
+                                  </div>
+                                </div>
+                                
+                                {(['Saudável', 'Em Risco', 'Crítico'] as UnifiedState[]).map((estado, stateIndex) => {
+                                  const probBase = base.probabilities[stateIndex];
+                                  const probCenario = cenario.probabilities[stateIndex];
+                                  const diferenca = probCenario - probBase;
+                                  
+                                  return (
+                                    <div key={estado} className="mb-3">
+                                      <div className="flex justify-between items-center mb-1">
+                                        <span className="text-sm font-medium flex items-center gap-1">
+                                          {getCoresEstado(estado).icon} {estado}
+                                        </span>
+                                        <span className={`text-sm font-bold px-2 py-1 rounded-lg ${
+                                          Math.abs(diferenca) < 0.01 ? 'text-gray-600 bg-gray-100' :
+                                          diferenca > 0 ? 'text-emerald-700 bg-emerald-100' : 'text-red-700 bg-red-100'
+                                        }`}>
+                                          {diferenca > 0 ? '+' : ''}{formatarProbabilidade(diferenca)}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                          <span>{formatarProbabilidade(probBase)}</span>
+                                        </div>
+                                        <span className="text-gray-400">→</span>
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                          <span>{formatarProbabilidade(probCenario)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="text-6xl mb-4">🔬</div>
+                          <h4 className="text-lg font-semibold text-gray-700 mb-2">Aguardando Experimento</h4>
+                          <p className="text-gray-600 text-sm">
+                            Modifique a matriz acima para ver as comparações
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Alertas e Recomendações Redesenhados */}
+              {sprintLogs.length >= 2 && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-violet-200/50 p-8">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl flex items-center justify-center text-white text-xl">
+                      ⚠️
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-800">Sistema de Alertas Inteligente</h3>
+                      <p className="text-gray-600">Detecção automática de riscos e recomendações personalizadas</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-6">
+                    {/* Alerta baseado no estado atual */}
+                    {estadoAtual === 'Crítico' && (
+                      <div className="bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 rounded-2xl p-6 shadow-lg">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center text-white text-xl animate-pulse">
+                            🚨
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-bold text-red-800 text-lg">ALERTA CRÍTICO</h4>
+                              <div className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full uppercase">
+                                Urgente
+                              </div>
+                            </div>
+                            <p className="text-red-700 mb-3">
+                              Projeto em estado crítico. Recomenda-se intervenção imediata para mitigar riscos.
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-red-600">
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                              <span>Ação necessária nas próximas 24 horas</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Alerta baseado em tendência */}
+                    {previsoes.length > 0 && previsoes[0].probabilities[2] > 0.5 && (
+                      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-500 rounded-2xl p-6 shadow-lg">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white text-xl">
+                            📈
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-bold text-orange-800 text-lg">TENDÊNCIA DE RISCO</h4>
+                              <div className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+                                Moderado
+                              </div>
+                            </div>
+                            <p className="text-orange-700 mb-3">
+                              Alta probabilidade ({formatarProbabilidade(previsoes[0].probabilities[2])}) 
+                              de transição para estado Crítico na próxima sprint.
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-orange-600">
+                              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                              <span>Monitoramento intensificado recomendado</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Recomendação baseada em dados insuficientes */}
+                    {sprintLogs.length < windowSize && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-6 shadow-lg">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+                            📊
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-bold text-blue-800 text-lg">CALIBRAÇÃO DO MODELO</h4>
+                              <div className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                                Info
+                              </div>
+                            </div>
+                            <p className="text-blue-700 mb-3">
+                              {windowSize - sprintLogs.length} sprints adicionais necessários para 
+                              atingir confiança total do modelo preditivo.
+                            </p>
+                            <div className="flex items-center gap-4">
+                              <div className="flex-1 bg-blue-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                                  style={{ width: `${(sprintLogs.length / windowSize) * 100}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-semibold text-blue-600">
+                                {Math.round((sprintLogs.length / windowSize) * 100)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {sprintLogs.length === 0 && (
+                      <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl p-8 text-center border border-gray-200">
+                        <div className="w-20 h-20 bg-gradient-to-br from-gray-400 to-slate-500 rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4">
+                          🎯
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-800 mb-3">Iniciar Jornada Preditiva</h4>
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                          Registre a primeira sprint para começar a construir seu modelo preditivo personalizado baseado na metodologia Scrum-Markov.
+                        </p>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl text-sm font-medium">
+                          <span>💡</span>
+                          <span>Quanto mais dados, maior a precisão das previsões</span>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Alertas e Recomendações */}
-            {sprintLogs.length >= 2 && (
-              <div className="bg-white p-6 rounded-xl shadow-lg border">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">⚠️ Alertas Automáticos e Recomendações</h3>
-                
-                <div className="space-y-3">
-                  {/* Alerta baseado no estado atual */}
-                  {estadoAtual === 'Crítico' && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-red-600">🚨</span>
-                        <span className="font-semibold text-red-800">Alerta Crítico</span>
-                      </div>
-                      <p className="text-red-700 mt-2">
-                        Projeto em estado crítico. Recomenda-se intervenção imediata para mitigar riscos.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {/* Alerta baseado em tendência */}
-                  {previsoes.length > 0 && previsoes[0].probabilities[2] > 0.5 && (
-                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-orange-600">📈</span>
-                        <span className="font-semibold text-orange-800">Tendência de Risco</span>
-                      </div>
-                      <p className="text-orange-700 mt-2">
-                        Alta probabilidade ({formatarProbabilidade(previsoes[0].probabilities[2])}) 
-                        de transição para estado Crítico na próxima sprint.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {/* Recomendação baseada em dados insuficientes */}
-                  {sprintLogs.length < windowSize && (
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-blue-600">📊</span>
-                        <span className="font-semibold text-blue-800">Calibração do Modelo</span>
-                      </div>
-                      <p className="text-blue-700 mt-2">
-                        {windowSize - sprintLogs.length} sprints adicionais necessários para 
-                        atingir confiança total do modelo preditivo.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {sprintLogs.length === 0 && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
-                      <div className="text-4xl mb-2">🎯</div>
-                      <h4 className="font-semibold text-gray-800 mb-2">Iniciar Análise Preditiva</h4>
-                      <p className="text-gray-600">
-                        Registre a primeira sprint para começar a construir o modelo preditivo Scrum-Markov.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
