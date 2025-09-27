@@ -72,10 +72,10 @@
   }, {
     "path" : "src\\pages\\DashboardPage.tsx",
     "modificationInfo" : {
-      "contentHash" : 652315493,
-      "lastModified" : 1758970595598
+      "contentHash" : 965488970,
+      "lastModified" : 1758970909912
     },
-    "linesOfCode" : 1531
+    "linesOfCode" : 1528
   }, {
     "path" : "src\\pages\\LoginPage.tsx",
     "modificationInfo" : {

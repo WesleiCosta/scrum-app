@@ -453,6 +453,78 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Plano de Ação Estratégico */}
+              <div className={`p-6 rounded-2xl shadow-xl border-2 ${
+                analisarSituacaoAtual.urgencia === 'alta' ? 'border-red-300 bg-gradient-to-br from-red-50 to-red-100' :
+                analisarSituacaoAtual.urgencia === 'media' ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-100' :
+                'border-green-300 bg-gradient-to-br from-green-50 to-emerald-100'
+              }`}>
+                <h4 className={`text-xl font-bold mb-4 flex items-center ${
+                  analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
+                  analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
+                  'text-green-800'
+                }`}>
+                  🎯 Plano de Ação Estratégico
+                  {analisarSituacaoAtual.urgencia === 'alta' && <span className="ml-2 animate-pulse">🚨</span>}
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-xl border-2 ${
+                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100/50 border-red-200' :
+                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100/50 border-yellow-200' :
+                    'bg-green-100/50 border-green-200'
+                  }`}>
+                    <h5 className={`font-bold mb-3 flex items-center ${
+                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
+                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
+                      'text-green-800'
+                    }`}>
+                      {analisarSituacaoAtual.urgencia === 'alta' ? '🚨 AÇÕES IMEDIATAS' :
+                       analisarSituacaoAtual.urgencia === 'media' ? '⚠️ AÇÕES PREVENTIVAS' :
+                       '✅ AÇÕES DE OTIMIZAÇÃO'}
+                    </h5>
+                    <ul className={`space-y-2 ${
+                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-700' :
+                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-700' :
+                      'text-green-700'
+                    }`}>
+                      {analisarSituacaoAtual.acoes.map((acao, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className={`mr-3 mt-1 ${
+                            analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-500' :
+                            analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-500' :
+                            'text-green-500'
+                          }`}>
+                            {index < 3 ? '🔥' : '📋'}
+                          </span>
+                          <span className="text-sm font-medium">{acao}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-white/70 p-4 rounded-xl border-2 border-gray-200 backdrop-blur-sm">
+                    <h5 className="font-bold text-gray-800 mb-3 flex items-center">
+                      🎯 Próximos Passos
+                    </h5>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center p-2 bg-blue-50 rounded-lg border border-blue-200">
+                        <span className="text-blue-600 mr-3">1️⃣</span>
+                        <span className="text-blue-800 font-medium">Implementar ações críticas</span>
+                      </div>
+                      <div className="flex items-center p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <span className="text-purple-600 mr-3">2️⃣</span>
+                        <span className="text-purple-800 font-medium">Monitorar indicadores diários</span>
+                      </div>
+                      <div className="flex items-center p-2 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <span className="text-indigo-600 mr-3">3️⃣</span>
+                        <span className="text-indigo-800 font-medium">Avaliar eficácia em 2-3 dias</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Coluna Lateral Direita */}
@@ -534,80 +606,6 @@ const DashboardPage: React.FC = () => {
                   <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                     <span className="text-gray-700">• Qualidade entregas</span>
                     <span className="text-blue-600 font-medium">Avaliar</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Plano de Ação - Largura Total */}
-            <div className="lg:col-span-12">
-              <div className={`p-6 rounded-2xl shadow-xl border-2 ${
-                analisarSituacaoAtual.urgencia === 'alta' ? 'border-red-300 bg-gradient-to-br from-red-50 to-red-100' :
-                analisarSituacaoAtual.urgencia === 'media' ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-100' :
-                'border-green-300 bg-gradient-to-br from-green-50 to-emerald-100'
-              }`}>
-                <h4 className={`text-xl font-bold mb-4 flex items-center ${
-                  analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
-                  analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
-                  'text-green-800'
-                }`}>
-                  🎯 Plano de Ação Estratégico
-                  {analisarSituacaoAtual.urgencia === 'alta' && <span className="ml-2 animate-pulse">🚨</span>}
-                </h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={`p-4 rounded-xl border-2 ${
-                    analisarSituacaoAtual.urgencia === 'alta' ? 'bg-red-100/50 border-red-200' :
-                    analisarSituacaoAtual.urgencia === 'media' ? 'bg-yellow-100/50 border-yellow-200' :
-                    'bg-green-100/50 border-green-200'
-                  }`}>
-                    <h5 className={`font-bold mb-3 flex items-center ${
-                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-800' :
-                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-800' :
-                      'text-green-800'
-                    }`}>
-                      {analisarSituacaoAtual.urgencia === 'alta' ? '🚨 AÇÕES IMEDIATAS' :
-                       analisarSituacaoAtual.urgencia === 'media' ? '⚠️ AÇÕES PREVENTIVAS' :
-                       '✅ AÇÕES DE OTIMIZAÇÃO'}
-                    </h5>
-                    <ul className={`space-y-2 ${
-                      analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-700' :
-                      analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-700' :
-                      'text-green-700'
-                    }`}>
-                      {analisarSituacaoAtual.acoes.map((acao, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className={`mr-3 mt-1 ${
-                            analisarSituacaoAtual.urgencia === 'alta' ? 'text-red-500' :
-                            analisarSituacaoAtual.urgencia === 'media' ? 'text-yellow-500' :
-                            'text-green-500'
-                          }`}>
-                            {index < 3 ? '🔥' : '📋'}
-                          </span>
-                          <span className="text-sm font-medium">{acao}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white/70 p-4 rounded-xl border-2 border-gray-200 backdrop-blur-sm">
-                    <h5 className="font-bold text-gray-800 mb-3 flex items-center">
-                      🎯 Próximos Passos
-                    </h5>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-center p-2 bg-blue-50 rounded-lg border border-blue-200">
-                        <span className="text-blue-600 mr-3">1️⃣</span>
-                        <span className="text-blue-800 font-medium">Implementar ações críticas</span>
-                      </div>
-                      <div className="flex items-center p-2 bg-purple-50 rounded-lg border border-purple-200">
-                        <span className="text-purple-600 mr-3">2️⃣</span>
-                        <span className="text-purple-800 font-medium">Monitorar indicadores diários</span>
-                      </div>
-                      <div className="flex items-center p-2 bg-indigo-50 rounded-lg border border-indigo-200">
-                        <span className="text-indigo-600 mr-3">3️⃣</span>
-                        <span className="text-indigo-800 font-medium">Avaliar eficácia em 2-3 dias</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1522,7 +1520,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
