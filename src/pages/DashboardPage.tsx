@@ -1003,7 +1003,14 @@ const DashboardPage: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-2 border border-violet-200">
                       <button
-                        onClick={() => setShowWhatIfAnalysis(!showWhatIfAnalysis)}
+                        onClick={() => {
+                          const newShowState = !showWhatIfAnalysis;
+                          setShowWhatIfAnalysis(newShowState);
+                          // Inicializar matriz What-If com cópia da matriz original quando ativar
+                          if (newShowState && !whatIfMatrix) {
+                            setWhatIfMatrix(matrizTransicao.map(row => [...row]));
+                          }
+                        }}
                         className={`
                           px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3
                           ${showWhatIfAnalysis 
